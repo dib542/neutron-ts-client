@@ -7,18 +7,11 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgAddAdmin } from "./types/adminmodule/tx";
-import { MsgSubmitProposal } from "./types/adminmodule/tx";
-import { MsgDeleteAdmin } from "./types/adminmodule/tx";
+import { MsgSubmitProposal } from "./types/cosmos/adminmodule/adminmodule/tx";
 
+import { QueryProposalsResponse as typeQueryProposalsResponse} from "./types"
 
-export { MsgAddAdmin, MsgSubmitProposal, MsgDeleteAdmin };
-
-type sendMsgAddAdminParams = {
-  value: MsgAddAdmin,
-  fee?: StdFee,
-  memo?: string
-};
+export { MsgSubmitProposal };
 
 type sendMsgSubmitProposalParams = {
   value: MsgSubmitProposal,
@@ -26,23 +19,9 @@ type sendMsgSubmitProposalParams = {
   memo?: string
 };
 
-type sendMsgDeleteAdminParams = {
-  value: MsgDeleteAdmin,
-  fee?: StdFee,
-  memo?: string
-};
-
-
-type msgAddAdminParams = {
-  value: MsgAddAdmin,
-};
 
 type msgSubmitProposalParams = {
   value: MsgSubmitProposal,
-};
-
-type msgDeleteAdminParams = {
-  value: MsgDeleteAdmin,
 };
 
 
@@ -75,20 +54,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgAddAdmin({ value, fee, memo }: sendMsgAddAdminParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgAddAdmin: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgAddAdmin({ value: MsgAddAdmin.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgAddAdmin: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		async sendMsgSubmitProposal({ value, fee, memo }: sendMsgSubmitProposalParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgSubmitProposal: Unable to sign Tx. Signer is not present.')
@@ -103,42 +68,12 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgDeleteAdmin({ value, fee, memo }: sendMsgDeleteAdminParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgDeleteAdmin: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgDeleteAdmin({ value: MsgDeleteAdmin.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgDeleteAdmin: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
-		
-		msgAddAdmin({ value }: msgAddAdminParams): EncodeObject {
-			try {
-				return { typeUrl: "/cosmos.adminmodule.adminmodule.MsgAddAdmin", value: MsgAddAdmin.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgAddAdmin: Could not create message: ' + e.message)
-			}
-		},
 		
 		msgSubmitProposal({ value }: msgSubmitProposalParams): EncodeObject {
 			try {
 				return { typeUrl: "/cosmos.adminmodule.adminmodule.MsgSubmitProposal", value: MsgSubmitProposal.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgSubmitProposal: Could not create message: ' + e.message)
-			}
-		},
-		
-		msgDeleteAdmin({ value }: msgDeleteAdminParams): EncodeObject {
-			try {
-				return { typeUrl: "/cosmos.adminmodule.adminmodule.MsgDeleteAdmin", value: MsgDeleteAdmin.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgDeleteAdmin: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -164,6 +99,7 @@ class SDKModule {
 		this.query = queryClient({ addr: client.env.apiURL });		
 		this.updateTX(client);
 		this.structure =  {
+						QueryProposalsResponse: getStructure(typeQueryProposalsResponse.fromPartial({})),
 						
 		};
 		client.on('signer-changed',(signer) => {			

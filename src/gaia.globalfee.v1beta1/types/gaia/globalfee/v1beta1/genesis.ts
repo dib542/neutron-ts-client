@@ -1,4 +1,5 @@
 /* eslint-disable */
+import Long from "long";
 import _m0 from "protobufjs/minimal";
 import { DecCoin } from "../../../cosmos/base/v1beta1/coin";
 
@@ -13,13 +14,24 @@ export interface GenesisState {
 /** Params defines the set of module parameters. */
 export interface Params {
   /**
-   * Minimum stores the minimum gas price(s) for all TX on the chain.
+   * minimum_gas_prices stores the minimum gas price(s) for all TX on the chain.
    * When multiple coins are defined then they are accepted alternatively.
    * The list must be sorted by denoms asc. No duplicate denoms or zero amount
    * values allowed. For more information see
    * https://docs.cosmos.network/main/modules/auth#concepts
    */
   minimumGasPrices: DecCoin[];
+  /**
+   * bypass_min_fee_msg_types defines a list of message type urls
+   * that are free of fee charge.
+   */
+  bypassMinFeeMsgTypes: string[];
+  /**
+   * max_total_bypass_min_fee_msg_gas_usage defines the total maximum gas usage
+   * allowed for a transaction containing only messages of types in bypass_min_fee_msg_types
+   * to bypass fee charge.
+   */
+  maxTotalBypassMinFeeMsgGasUsage: number;
 }
 
 function createBaseGenesisState(): GenesisState {
@@ -72,13 +84,19 @@ export const GenesisState = {
 };
 
 function createBaseParams(): Params {
-  return { minimumGasPrices: [] };
+  return { minimumGasPrices: [], bypassMinFeeMsgTypes: [], maxTotalBypassMinFeeMsgGasUsage: 0 };
 }
 
 export const Params = {
   encode(message: Params, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.minimumGasPrices) {
       DecCoin.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    for (const v of message.bypassMinFeeMsgTypes) {
+      writer.uint32(18).string(v!);
+    }
+    if (message.maxTotalBypassMinFeeMsgGasUsage !== 0) {
+      writer.uint32(24).uint64(message.maxTotalBypassMinFeeMsgGasUsage);
     }
     return writer;
   },
@@ -93,6 +111,12 @@ export const Params = {
         case 1:
           message.minimumGasPrices.push(DecCoin.decode(reader, reader.uint32()));
           break;
+        case 2:
+          message.bypassMinFeeMsgTypes.push(reader.string());
+          break;
+        case 3:
+          message.maxTotalBypassMinFeeMsgGasUsage = longToNumber(reader.uint64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -106,6 +130,12 @@ export const Params = {
       minimumGasPrices: Array.isArray(object?.minimumGasPrices)
         ? object.minimumGasPrices.map((e: any) => DecCoin.fromJSON(e))
         : [],
+      bypassMinFeeMsgTypes: Array.isArray(object?.bypassMinFeeMsgTypes)
+        ? object.bypassMinFeeMsgTypes.map((e: any) => String(e))
+        : [],
+      maxTotalBypassMinFeeMsgGasUsage: isSet(object.maxTotalBypassMinFeeMsgGasUsage)
+        ? Number(object.maxTotalBypassMinFeeMsgGasUsage)
+        : 0,
     };
   },
 
@@ -116,15 +146,43 @@ export const Params = {
     } else {
       obj.minimumGasPrices = [];
     }
+    if (message.bypassMinFeeMsgTypes) {
+      obj.bypassMinFeeMsgTypes = message.bypassMinFeeMsgTypes.map((e) => e);
+    } else {
+      obj.bypassMinFeeMsgTypes = [];
+    }
+    message.maxTotalBypassMinFeeMsgGasUsage !== undefined
+      && (obj.maxTotalBypassMinFeeMsgGasUsage = Math.round(message.maxTotalBypassMinFeeMsgGasUsage));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<Params>, I>>(object: I): Params {
     const message = createBaseParams();
     message.minimumGasPrices = object.minimumGasPrices?.map((e) => DecCoin.fromPartial(e)) || [];
+    message.bypassMinFeeMsgTypes = object.bypassMinFeeMsgTypes?.map((e) => e) || [];
+    message.maxTotalBypassMinFeeMsgGasUsage = object.maxTotalBypassMinFeeMsgGasUsage ?? 0;
     return message;
   },
 };
+
+declare var self: any | undefined;
+declare var window: any | undefined;
+declare var global: any | undefined;
+var globalThis: any = (() => {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  throw "Unable to locate global object";
+})();
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
@@ -136,6 +194,18 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(long: Long): number {
+  if (long.gt(Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  return long.toNumber();
+}
+
+if (_m0.util.Long !== Long) {
+  _m0.util.Long = Long as any;
+  _m0.configure();
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

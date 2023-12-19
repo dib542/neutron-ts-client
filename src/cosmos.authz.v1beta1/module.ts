@@ -14,6 +14,7 @@ import { MsgGrant } from "./types/cosmos/authz/v1beta1/tx";
 import { GenericAuthorization as typeGenericAuthorization} from "./types"
 import { Grant as typeGrant} from "./types"
 import { GrantAuthorization as typeGrantAuthorization} from "./types"
+import { GrantQueueItem as typeGrantQueueItem} from "./types"
 import { EventGrant as typeEventGrant} from "./types"
 import { EventRevoke as typeEventRevoke} from "./types"
 
@@ -172,6 +173,7 @@ class SDKModule {
 						GenericAuthorization: getStructure(typeGenericAuthorization.fromPartial({})),
 						Grant: getStructure(typeGrant.fromPartial({})),
 						GrantAuthorization: getStructure(typeGrantAuthorization.fromPartial({})),
+						GrantQueueItem: getStructure(typeGrantQueueItem.fromPartial({})),
 						EventGrant: getStructure(typeEventGrant.fromPartial({})),
 						EventRevoke: getStructure(typeEventRevoke.fromPartial({})),
 						

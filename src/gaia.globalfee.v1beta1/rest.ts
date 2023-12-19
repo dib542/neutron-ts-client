@@ -32,11 +32,40 @@ export interface V1Beta1DecCoin {
 }
 
 /**
+ * Params defines the set of module parameters.
+ */
+export interface V1Beta1Params {
+  /**
+   * minimum_gas_prices stores the minimum gas price(s) for all TX on the chain.
+   * When multiple coins are defined then they are accepted alternatively.
+   * The list must be sorted by denoms asc. No duplicate denoms or zero amount
+   * values allowed. For more information see
+   * https://docs.cosmos.network/main/modules/auth#concepts
+   */
+  minimum_gas_prices?: V1Beta1DecCoin[];
+
+  /**
+   * bypass_min_fee_msg_types defines a list of message type urls
+   * that are free of fee charge.
+   */
+  bypass_min_fee_msg_types?: string[];
+
+  /**
+   * max_total_bypass_min_fee_msg_gas_usage defines the total maximum gas usage
+   * allowed for a transaction containing only messages of types in bypass_min_fee_msg_types
+   * to bypass fee charge.
+   * @format uint64
+   */
+  max_total_bypass_min_fee_msg_gas_usage?: string;
+}
+
+/**
 * QueryMinimumGasPricesResponse is the response type for the
 Query/MinimumGasPrices RPC method.
 */
-export interface V1Beta1QueryMinimumGasPricesResponse {
-  minimum_gas_prices?: V1Beta1DecCoin[];
+export interface V1Beta1QueryParamsResponse {
+  /** Params defines the set of module parameters. */
+  params?: V1Beta1Params;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
@@ -168,12 +197,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * No description
    *
    * @tags Query
-   * @name QueryMinimumGasPrices
-   * @request GET:/gaia/globalfee/v1beta1/minimum_gas_prices
+   * @name QueryParams
+   * @request GET:/gaia/globalfee/v1beta1/params
    */
-  queryMinimumGasPrices = (params: RequestParams = {}) =>
-    this.request<V1Beta1QueryMinimumGasPricesResponse, RpcStatus>({
-      path: `/gaia/globalfee/v1beta1/minimum_gas_prices`,
+  queryParams = (params: RequestParams = {}) =>
+    this.request<V1Beta1QueryParamsResponse, RpcStatus>({
+      path: `/gaia/globalfee/v1beta1/params`,
       method: "GET",
       format: "json",
       ...params,

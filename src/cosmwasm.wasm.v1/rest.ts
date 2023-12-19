@@ -156,33 +156,22 @@ export interface V1AccessConfig {
   /**
    * - ACCESS_TYPE_UNSPECIFIED: AccessTypeUnspecified placeholder for empty value
    *  - ACCESS_TYPE_NOBODY: AccessTypeNobody forbidden
-   *  - ACCESS_TYPE_ONLY_ADDRESS: AccessTypeOnlyAddress restricted to a single address
-   * Deprecated: use AccessTypeAnyOfAddresses instead
    *  - ACCESS_TYPE_EVERYBODY: AccessTypeEverybody unrestricted
    *  - ACCESS_TYPE_ANY_OF_ADDRESSES: AccessTypeAnyOfAddresses allow any of the addresses
    */
   permission?: V1AccessType;
-
-  /**
-   * Address
-   * Deprecated: replaced by addresses
-   */
-  address?: string;
   addresses?: string[];
 }
 
 /**
 * - ACCESS_TYPE_UNSPECIFIED: AccessTypeUnspecified placeholder for empty value
  - ACCESS_TYPE_NOBODY: AccessTypeNobody forbidden
- - ACCESS_TYPE_ONLY_ADDRESS: AccessTypeOnlyAddress restricted to a single address
-Deprecated: use AccessTypeAnyOfAddresses instead
  - ACCESS_TYPE_EVERYBODY: AccessTypeEverybody unrestricted
  - ACCESS_TYPE_ANY_OF_ADDRESSES: AccessTypeAnyOfAddresses allow any of the addresses
 */
 export enum V1AccessType {
   ACCESS_TYPE_UNSPECIFIED = "ACCESS_TYPE_UNSPECIFIED",
   ACCESS_TYPE_NOBODY = "ACCESS_TYPE_NOBODY",
-  ACCESS_TYPE_ONLY_ADDRESS = "ACCESS_TYPE_ONLY_ADDRESS",
   ACCESS_TYPE_EVERYBODY = "ACCESS_TYPE_EVERYBODY",
   ACCESS_TYPE_ANY_OF_ADDRESSES = "ACCESS_TYPE_ANY_OF_ADDRESSES",
 }
@@ -281,6 +270,12 @@ export interface V1Model {
   value?: string;
 }
 
+/**
+* MsgAddCodeUploadParamsAddressesResponse defines the response
+structure for executing a MsgAddCodeUploadParamsAddresses message.
+*/
+export type V1MsgAddCodeUploadParamsAddressesResponse = object;
+
 export type V1MsgClearAdminResponse = object;
 
 /**
@@ -329,6 +324,63 @@ export interface V1MsgMigrateContractResponse {
 }
 
 /**
+* MsgPinCodesResponse defines the response structure for executing a
+MsgPinCodes message.
+
+Since: 0.40
+*/
+export type V1MsgPinCodesResponse = object;
+
+/**
+* MsgRemoveCodeUploadParamsAddressesResponse defines the response
+structure for executing a MsgRemoveCodeUploadParamsAddresses message.
+*/
+export type V1MsgRemoveCodeUploadParamsAddressesResponse = object;
+
+/**
+* MsgStoreAndInstantiateContractResponse defines the response structure
+for executing a MsgStoreAndInstantiateContract message.
+
+Since: 0.40
+*/
+export interface V1MsgStoreAndInstantiateContractResponse {
+  /** Address is the bech32 address of the new contract instance. */
+  address?: string;
+
+  /**
+   * Data contains bytes to returned from the contract
+   * @format byte
+   */
+  data?: string;
+}
+
+/**
+* MsgStoreAndMigrateContractResponse defines the response structure
+for executing a MsgStoreAndMigrateContract message.
+
+Since: 0.42
+*/
+export interface V1MsgStoreAndMigrateContractResponse {
+  /**
+   * CodeID is the reference to the stored WASM code
+   * @format uint64
+   */
+  code_id?: string;
+
+  /**
+   * Checksum is the sha256 hash of the stored code
+   * @format byte
+   */
+  checksum?: string;
+
+  /**
+   * Data contains bytes to returned from the contract
+   * @format byte
+   */
+  data?: string;
+}
+
+/**
  * MsgStoreCodeResponse returns store result data.
  */
 export interface V1MsgStoreCodeResponse {
@@ -345,9 +397,41 @@ export interface V1MsgStoreCodeResponse {
   checksum?: string;
 }
 
+/**
+* MsgSudoContractResponse defines the response structure for executing a
+MsgSudoContract message.
+
+Since: 0.40
+*/
+export interface V1MsgSudoContractResponse {
+  /**
+   * Data contains bytes to returned from the contract
+   * @format byte
+   */
+  data?: string;
+}
+
+/**
+* MsgUnpinCodesResponse defines the response structure for executing a
+MsgUnpinCodes message.
+
+Since: 0.40
+*/
+export type V1MsgUnpinCodesResponse = object;
+
 export type V1MsgUpdateAdminResponse = object;
 
+export type V1MsgUpdateContractLabelResponse = object;
+
 export type V1MsgUpdateInstantiateConfigResponse = object;
+
+/**
+* MsgUpdateParamsResponse defines the response structure for executing a
+MsgUpdateParams message.
+
+Since: 0.40
+*/
+export type V1MsgUpdateParamsResponse = object;
 
 /**
  * Params defines the set of wasm parameters.
@@ -359,8 +443,6 @@ export interface V1Params {
   /**
    * - ACCESS_TYPE_UNSPECIFIED: AccessTypeUnspecified placeholder for empty value
    *  - ACCESS_TYPE_NOBODY: AccessTypeNobody forbidden
-   *  - ACCESS_TYPE_ONLY_ADDRESS: AccessTypeOnlyAddress restricted to a single address
-   * Deprecated: use AccessTypeAnyOfAddresses instead
    *  - ACCESS_TYPE_EVERYBODY: AccessTypeEverybody unrestricted
    *  - ACCESS_TYPE_ANY_OF_ADDRESSES: AccessTypeAnyOfAddresses allow any of the addresses
    */
@@ -521,7 +603,8 @@ corresponding request message has used PageRequest.
 export interface V1Beta1PageResponse {
   /**
    * next_key is the key to be passed to PageRequest.key to
-   * query the next page most efficiently
+   * query the next page most efficiently. It will be empty if
+   * there are no more results.
    * @format byte
    */
   next_key?: string;

@@ -14,6 +14,14 @@ export type AdminmoduleMsgAddAdminResponse = object;
 export type AdminmoduleMsgDeleteAdminResponse = object;
 
 /**
+ * MsgSubmitProposalLegacyResponse defines the Msg/SubmitProposalLegacy response type.
+ */
+export interface AdminmoduleMsgSubmitProposalLegacyResponse {
+  /** @format uint64 */
+  proposal_id?: string;
+}
+
+/**
  * MsgSubmitProposalResponse defines the Msg/SubmitProposal response type.
  */
 export interface AdminmoduleMsgSubmitProposalResponse {
@@ -25,8 +33,217 @@ export interface AdminmoduleQueryAdminsResponse {
   admins?: string[];
 }
 
+export interface AdminmoduleQueryArchivedProposalsLegacyResponse {
+  proposalsLegacy?: Govv1Beta1Proposal[];
+}
+
 export interface AdminmoduleQueryArchivedProposalsResponse {
-  proposals?: V1Beta1Proposal[];
+  proposals?: Govv1Proposal[];
+}
+
+/**
+ * Proposal defines the core field members of a governance proposal.
+ */
+export interface Govv1Proposal {
+  /**
+   * id defines the unique id of the proposal.
+   * @format uint64
+   */
+  id?: string;
+
+  /** messages are the arbitrary messages to be executed if the proposal passes. */
+  messages?: ProtobufAny[];
+
+  /** status defines the proposal status. */
+  status?: Govv1ProposalStatus;
+
+  /**
+   * final_tally_result is the final tally result of the proposal. When
+   * querying a proposal via gRPC, this field is not populated until the
+   * proposal's voting period has ended.
+   */
+  final_tally_result?: Govv1TallyResult;
+
+  /**
+   * submit_time is the time of proposal submission.
+   * @format date-time
+   */
+  submit_time?: string;
+
+  /**
+   * deposit_end_time is the end time for deposition.
+   * @format date-time
+   */
+  deposit_end_time?: string;
+
+  /** total_deposit is the total deposit on the proposal. */
+  total_deposit?: V1Beta1Coin[];
+
+  /**
+   * voting_start_time is the starting time to vote on a proposal.
+   * @format date-time
+   */
+  voting_start_time?: string;
+
+  /**
+   * voting_end_time is the end time of voting on a proposal.
+   * @format date-time
+   */
+  voting_end_time?: string;
+
+  /** metadata is any arbitrary metadata attached to the proposal. */
+  metadata?: string;
+
+  /**
+   * title is the title of the proposal
+   * Since: cosmos-sdk 0.47
+   */
+  title?: string;
+
+  /**
+   * summary is a short summary of the proposal
+   * Since: cosmos-sdk 0.47
+   */
+  summary?: string;
+
+  /**
+   * Proposer is the address of the proposal sumbitter
+   * Since: cosmos-sdk 0.47
+   */
+  proposer?: string;
+}
+
+/**
+* ProposalStatus enumerates the valid statuses of a proposal.
+
+ - PROPOSAL_STATUS_UNSPECIFIED: PROPOSAL_STATUS_UNSPECIFIED defines the default proposal status.
+ - PROPOSAL_STATUS_DEPOSIT_PERIOD: PROPOSAL_STATUS_DEPOSIT_PERIOD defines a proposal status during the deposit
+period.
+ - PROPOSAL_STATUS_VOTING_PERIOD: PROPOSAL_STATUS_VOTING_PERIOD defines a proposal status during the voting
+period.
+ - PROPOSAL_STATUS_PASSED: PROPOSAL_STATUS_PASSED defines a proposal status of a proposal that has
+passed.
+ - PROPOSAL_STATUS_REJECTED: PROPOSAL_STATUS_REJECTED defines a proposal status of a proposal that has
+been rejected.
+ - PROPOSAL_STATUS_FAILED: PROPOSAL_STATUS_FAILED defines a proposal status of a proposal that has
+failed.
+*/
+export enum Govv1ProposalStatus {
+  PROPOSAL_STATUS_UNSPECIFIED = "PROPOSAL_STATUS_UNSPECIFIED",
+  PROPOSAL_STATUS_DEPOSIT_PERIOD = "PROPOSAL_STATUS_DEPOSIT_PERIOD",
+  PROPOSAL_STATUS_VOTING_PERIOD = "PROPOSAL_STATUS_VOTING_PERIOD",
+  PROPOSAL_STATUS_PASSED = "PROPOSAL_STATUS_PASSED",
+  PROPOSAL_STATUS_REJECTED = "PROPOSAL_STATUS_REJECTED",
+  PROPOSAL_STATUS_FAILED = "PROPOSAL_STATUS_FAILED",
+}
+
+/**
+ * TallyResult defines a standard tally for a governance proposal.
+ */
+export interface Govv1TallyResult {
+  /** yes_count is the number of yes votes on a proposal. */
+  yes_count?: string;
+
+  /** abstain_count is the number of abstain votes on a proposal. */
+  abstain_count?: string;
+
+  /** no_count is the number of no votes on a proposal. */
+  no_count?: string;
+
+  /** no_with_veto_count is the number of no with veto votes on a proposal. */
+  no_with_veto_count?: string;
+}
+
+/**
+ * Proposal defines the core field members of a governance proposal.
+ */
+export interface Govv1Beta1Proposal {
+  /**
+   * proposal_id defines the unique id of the proposal.
+   * @format uint64
+   */
+  proposal_id?: string;
+
+  /** content is the proposal's content. */
+  content?: ProtobufAny;
+
+  /** status defines the proposal status. */
+  status?: Govv1Beta1ProposalStatus;
+
+  /**
+   * final_tally_result is the final tally result of the proposal. When
+   * querying a proposal via gRPC, this field is not populated until the
+   * proposal's voting period has ended.
+   */
+  final_tally_result?: Govv1Beta1TallyResult;
+
+  /**
+   * submit_time is the time of proposal submission.
+   * @format date-time
+   */
+  submit_time?: string;
+
+  /**
+   * deposit_end_time is the end time for deposition.
+   * @format date-time
+   */
+  deposit_end_time?: string;
+
+  /** total_deposit is the total deposit on the proposal. */
+  total_deposit?: V1Beta1Coin[];
+
+  /**
+   * voting_start_time is the starting time to vote on a proposal.
+   * @format date-time
+   */
+  voting_start_time?: string;
+
+  /**
+   * voting_end_time is the end time of voting on a proposal.
+   * @format date-time
+   */
+  voting_end_time?: string;
+}
+
+/**
+* ProposalStatus enumerates the valid statuses of a proposal.
+
+ - PROPOSAL_STATUS_UNSPECIFIED: PROPOSAL_STATUS_UNSPECIFIED defines the default proposal status.
+ - PROPOSAL_STATUS_DEPOSIT_PERIOD: PROPOSAL_STATUS_DEPOSIT_PERIOD defines a proposal status during the deposit
+period.
+ - PROPOSAL_STATUS_VOTING_PERIOD: PROPOSAL_STATUS_VOTING_PERIOD defines a proposal status during the voting
+period.
+ - PROPOSAL_STATUS_PASSED: PROPOSAL_STATUS_PASSED defines a proposal status of a proposal that has
+passed.
+ - PROPOSAL_STATUS_REJECTED: PROPOSAL_STATUS_REJECTED defines a proposal status of a proposal that has
+been rejected.
+ - PROPOSAL_STATUS_FAILED: PROPOSAL_STATUS_FAILED defines a proposal status of a proposal that has
+failed.
+*/
+export enum Govv1Beta1ProposalStatus {
+  PROPOSAL_STATUS_UNSPECIFIED = "PROPOSAL_STATUS_UNSPECIFIED",
+  PROPOSAL_STATUS_DEPOSIT_PERIOD = "PROPOSAL_STATUS_DEPOSIT_PERIOD",
+  PROPOSAL_STATUS_VOTING_PERIOD = "PROPOSAL_STATUS_VOTING_PERIOD",
+  PROPOSAL_STATUS_PASSED = "PROPOSAL_STATUS_PASSED",
+  PROPOSAL_STATUS_REJECTED = "PROPOSAL_STATUS_REJECTED",
+  PROPOSAL_STATUS_FAILED = "PROPOSAL_STATUS_FAILED",
+}
+
+/**
+ * TallyResult defines a standard tally for a governance proposal.
+ */
+export interface Govv1Beta1TallyResult {
+  /** yes is the number of yes votes on a proposal. */
+  yes?: string;
+
+  /** abstain is the number of abstain votes on a proposal. */
+  abstain?: string;
+
+  /** no is the number of no votes on a proposal. */
+  no?: string;
+
+  /** no_with_veto is the number of no with veto votes on a proposal. */
+  no_with_veto?: string;
 }
 
 /**
@@ -161,140 +378,6 @@ export interface V1Beta1Coin {
   amount?: string;
 }
 
-/**
- * Proposal defines the core field members of a governance proposal.
- */
-export interface V1Beta1Proposal {
-  /** @format uint64 */
-  proposal_id?: string;
-
-  /**
-   * `Any` contains an arbitrary serialized protocol buffer message along with a
-   * URL that describes the type of the serialized message.
-   *
-   * Protobuf library provides support to pack/unpack Any values in the form
-   * of utility functions or additional generated methods of the Any type.
-   * Example 1: Pack and unpack a message in C++.
-   *     Foo foo = ...;
-   *     Any any;
-   *     any.PackFrom(foo);
-   *     ...
-   *     if (any.UnpackTo(&foo)) {
-   *       ...
-   *     }
-   * Example 2: Pack and unpack a message in Java.
-   *     Any any = Any.pack(foo);
-   *     if (any.is(Foo.class)) {
-   *       foo = any.unpack(Foo.class);
-   *  Example 3: Pack and unpack a message in Python.
-   *     foo = Foo(...)
-   *     any = Any()
-   *     any.Pack(foo)
-   *     if any.Is(Foo.DESCRIPTOR):
-   *       any.Unpack(foo)
-   *  Example 4: Pack and unpack a message in Go
-   *      foo := &pb.Foo{...}
-   *      any, err := anypb.New(foo)
-   *      if err != nil {
-   *        ...
-   *      }
-   *      ...
-   *      foo := &pb.Foo{}
-   *      if err := any.UnmarshalTo(foo); err != nil {
-   * The pack methods provided by protobuf library will by default use
-   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
-   * methods only use the fully qualified type name after the last '/'
-   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
-   * name "y.z".
-   * JSON
-   * ====
-   * The JSON representation of an `Any` value uses the regular
-   * representation of the deserialized, embedded message, with an
-   * additional field `@type` which contains the type URL. Example:
-   *     package google.profile;
-   *     message Person {
-   *       string first_name = 1;
-   *       string last_name = 2;
-   *     {
-   *       "@type": "type.googleapis.com/google.profile.Person",
-   *       "firstName": <string>,
-   *       "lastName": <string>
-   * If the embedded message type is well-known and has a custom JSON
-   * representation, that representation will be embedded adding a field
-   * `value` which holds the custom JSON in addition to the `@type`
-   * field. Example (for message [google.protobuf.Duration][]):
-   *       "@type": "type.googleapis.com/google.protobuf.Duration",
-   *       "value": "1.212s"
-   */
-  content?: ProtobufAny;
-
-  /**
-   * ProposalStatus enumerates the valid statuses of a proposal.
-   *
-   *  - PROPOSAL_STATUS_UNSPECIFIED: PROPOSAL_STATUS_UNSPECIFIED defines the default propopsal status.
-   *  - PROPOSAL_STATUS_DEPOSIT_PERIOD: PROPOSAL_STATUS_DEPOSIT_PERIOD defines a proposal status during the deposit
-   * period.
-   *  - PROPOSAL_STATUS_VOTING_PERIOD: PROPOSAL_STATUS_VOTING_PERIOD defines a proposal status during the voting
-   *  - PROPOSAL_STATUS_PASSED: PROPOSAL_STATUS_PASSED defines a proposal status of a proposal that has
-   * passed.
-   *  - PROPOSAL_STATUS_REJECTED: PROPOSAL_STATUS_REJECTED defines a proposal status of a proposal that has
-   * been rejected.
-   *  - PROPOSAL_STATUS_FAILED: PROPOSAL_STATUS_FAILED defines a proposal status of a proposal that has
-   * failed.
-   */
-  status?: V1Beta1ProposalStatus;
-
-  /** TallyResult defines a standard tally for a governance proposal. */
-  final_tally_result?: V1Beta1TallyResult;
-
-  /** @format date-time */
-  submit_time?: string;
-
-  /** @format date-time */
-  deposit_end_time?: string;
-  total_deposit?: V1Beta1Coin[];
-
-  /** @format date-time */
-  voting_start_time?: string;
-
-  /** @format date-time */
-  voting_end_time?: string;
-}
-
-/**
-* ProposalStatus enumerates the valid statuses of a proposal.
-
- - PROPOSAL_STATUS_UNSPECIFIED: PROPOSAL_STATUS_UNSPECIFIED defines the default propopsal status.
- - PROPOSAL_STATUS_DEPOSIT_PERIOD: PROPOSAL_STATUS_DEPOSIT_PERIOD defines a proposal status during the deposit
-period.
- - PROPOSAL_STATUS_VOTING_PERIOD: PROPOSAL_STATUS_VOTING_PERIOD defines a proposal status during the voting
-period.
- - PROPOSAL_STATUS_PASSED: PROPOSAL_STATUS_PASSED defines a proposal status of a proposal that has
-passed.
- - PROPOSAL_STATUS_REJECTED: PROPOSAL_STATUS_REJECTED defines a proposal status of a proposal that has
-been rejected.
- - PROPOSAL_STATUS_FAILED: PROPOSAL_STATUS_FAILED defines a proposal status of a proposal that has
-failed.
-*/
-export enum V1Beta1ProposalStatus {
-  PROPOSAL_STATUS_UNSPECIFIED = "PROPOSAL_STATUS_UNSPECIFIED",
-  PROPOSAL_STATUS_DEPOSIT_PERIOD = "PROPOSAL_STATUS_DEPOSIT_PERIOD",
-  PROPOSAL_STATUS_VOTING_PERIOD = "PROPOSAL_STATUS_VOTING_PERIOD",
-  PROPOSAL_STATUS_PASSED = "PROPOSAL_STATUS_PASSED",
-  PROPOSAL_STATUS_REJECTED = "PROPOSAL_STATUS_REJECTED",
-  PROPOSAL_STATUS_FAILED = "PROPOSAL_STATUS_FAILED",
-}
-
-/**
- * TallyResult defines a standard tally for a governance proposal.
- */
-export interface V1Beta1TallyResult {
-  yes?: string;
-  abstain?: string;
-  no?: string;
-  no_with_veto?: string;
-}
-
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
 
 export type QueryParamsType = Record<string | number, any>;
@@ -416,7 +499,7 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title adminmodule/genesis.proto
+ * @title cosmos/adminmodule/adminmodule/genesis.proto
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -447,6 +530,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
   queryArchivedProposals = (params: RequestParams = {}) =>
     this.request<AdminmoduleQueryArchivedProposalsResponse, RpcStatus>({
       path: `/cosmos/adminmodule/adminmodule/archivedproposals`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryArchivedProposalsLegacy
+   * @summary Queries a list of archived proposals.
+   * @request GET:/cosmos/adminmodule/adminmodule/archivedproposalslegacy
+   */
+  queryArchivedProposalsLegacy = (params: RequestParams = {}) =>
+    this.request<AdminmoduleQueryArchivedProposalsLegacyResponse, RpcStatus>({
+      path: `/cosmos/adminmodule/adminmodule/archivedproposalslegacy`,
       method: "GET",
       format: "json",
       ...params,

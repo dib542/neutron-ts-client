@@ -21,30 +21,6 @@ export interface FeerefunderFee {
 }
 
 /**
- * Params defines the parameters for the module.
- */
-export interface InterchaintxsParams {
-  /**
-   * Defines maximum amount of messages to be passed in MsgSubmitTx
-   * @format uint64
-   */
-  msg_submit_tx_max_messages?: string;
-}
-
-export interface InterchaintxsQueryInterchainAccountAddressResponse {
-  /** The corresponding interchain account address on the host chain */
-  interchain_account_address?: string;
-}
-
-/**
- * QueryParamsResponse is response type for the Query/Params RPC method.
- */
-export interface InterchaintxsQueryParamsResponse {
-  /** params holds all the parameters of this module. */
-  params?: InterchaintxsParams;
-}
-
-/**
 * `Any` contains an arbitrary serialized protocol buffer message along with a
 URL that describes the type of the serialized message.
 
@@ -178,8 +154,43 @@ export interface V1MsgSubmitTxResponse {
    */
   sequence_id?: string;
 
-  /** channel src channel on neutron side trasaction was submitted from */
+  /** channel src channel on neutron side transaction was submitted from */
   channel?: string;
+}
+
+/**
+* MsgUpdateParamsResponse defines the response structure for executing a
+MsgUpdateParams message.
+
+Since: 0.47
+*/
+export type V1MsgUpdateParamsResponse = object;
+
+/**
+ * Params defines the parameters for the module.
+ */
+export interface V1Params {
+  /**
+   * Defines maximum amount of messages to be passed in MsgSubmitTx
+   * @format uint64
+   */
+  msg_submit_tx_max_messages?: string;
+
+  /** Defines a minimum fee required to register interchain account */
+  register_fee?: V1Beta1Coin[];
+}
+
+export interface V1QueryInterchainAccountAddressResponse {
+  /** The corresponding interchain account address on the host chain */
+  interchain_account_address?: string;
+}
+
+/**
+ * QueryParamsResponse is response type for the Query/Params RPC method.
+ */
+export interface V1QueryParamsResponse {
+  /** params holds all the parameters of this module. */
+  params?: V1Params;
 }
 
 /**
@@ -314,7 +325,43 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title interchaintxs/v1/genesis.proto
+ * @title neutron/interchaintxs/v1/genesis.proto
  * @version version not set
  */
-export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {}
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryParams
+   * @summary Parameters queries the parameters of the module.
+   * @request GET:/neutron/interchaintxs/params
+   */
+  queryParams = (params: RequestParams = {}) =>
+    this.request<V1QueryParamsResponse, RpcStatus>({
+      path: `/neutron/interchaintxs/params`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryInterchainAccountAddress
+   * @request GET:/neutron/interchaintxs/{owner_address}/{interchain_account_id}/{connection_id}/interchain_account_address
+   */
+  queryInterchainAccountAddress = (
+    ownerAddress: string,
+    interchainAccountId: string,
+    connectionId: string,
+    params: RequestParams = {},
+  ) =>
+    this.request<V1QueryInterchainAccountAddressResponse, RpcStatus>({
+      path: `/neutron/interchaintxs/${ownerAddress}/${interchainAccountId}/${connectionId}/interchain_account_address`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+}

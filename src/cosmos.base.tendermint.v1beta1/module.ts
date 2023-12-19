@@ -11,6 +11,10 @@ import { Api } from "./rest";
 import { Validator as typeValidator} from "./types"
 import { VersionInfo as typeVersionInfo} from "./types"
 import { Module as typeModule} from "./types"
+import { ProofOp as typeProofOp} from "./types"
+import { ProofOps as typeProofOps} from "./types"
+import { Block as typeBlock} from "./types"
+import { Header as typeHeader} from "./types"
 
 export {  };
 
@@ -71,6 +75,10 @@ class SDKModule {
 						Validator: getStructure(typeValidator.fromPartial({})),
 						VersionInfo: getStructure(typeVersionInfo.fromPartial({})),
 						Module: getStructure(typeModule.fromPartial({})),
+						ProofOp: getStructure(typeProofOp.fromPartial({})),
+						ProofOps: getStructure(typeProofOps.fromPartial({})),
+						Block: getStructure(typeBlock.fromPartial({})),
+						Header: getStructure(typeHeader.fromPartial({})),
 						
 		};
 		client.on('signer-changed',(signer) => {			

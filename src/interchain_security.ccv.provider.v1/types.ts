@@ -1,8 +1,5 @@
 import { ConsumerState } from "./types/interchain_security/ccv/provider/v1/genesis"
 import { ValsetUpdateIdToHeight } from "./types/interchain_security/ccv/provider/v1/genesis"
-import { ValidatorConsumerPubKey } from "./types/interchain_security/ccv/provider/v1/genesis"
-import { ValidatorByConsumerAddr } from "./types/interchain_security/ccv/provider/v1/genesis"
-import { ConsumerAddrsToPrune } from "./types/interchain_security/ccv/provider/v1/genesis"
 import { ConsumerAdditionProposal } from "./types/interchain_security/ccv/provider/v1/provider"
 import { ConsumerRemovalProposal } from "./types/interchain_security/ccv/provider/v1/provider"
 import { EquivocationProposal } from "./types/interchain_security/ccv/provider/v1/provider"
@@ -19,6 +16,9 @@ import { UnbondingOp } from "./types/interchain_security/ccv/provider/v1/provide
 import { InitTimeoutTimestamp } from "./types/interchain_security/ccv/provider/v1/provider"
 import { VscSendTimestamp } from "./types/interchain_security/ccv/provider/v1/provider"
 import { KeyAssignmentReplacement } from "./types/interchain_security/ccv/provider/v1/provider"
+import { ValidatorConsumerPubKey } from "./types/interchain_security/ccv/provider/v1/provider"
+import { ValidatorByConsumerAddr } from "./types/interchain_security/ccv/provider/v1/provider"
+import { ConsumerAddrsToPrune } from "./types/interchain_security/ccv/provider/v1/provider"
 import { Chain } from "./types/interchain_security/ccv/provider/v1/query"
 import { ThrottledSlashPacket } from "./types/interchain_security/ccv/provider/v1/query"
 import { ThrottledPacketDataWrapper } from "./types/interchain_security/ccv/provider/v1/query"
@@ -27,9 +27,6 @@ import { ThrottledPacketDataWrapper } from "./types/interchain_security/ccv/prov
 export {     
     ConsumerState,
     ValsetUpdateIdToHeight,
-    ValidatorConsumerPubKey,
-    ValidatorByConsumerAddr,
-    ConsumerAddrsToPrune,
     ConsumerAdditionProposal,
     ConsumerRemovalProposal,
     EquivocationProposal,
@@ -46,6 +43,9 @@ export {
     InitTimeoutTimestamp,
     VscSendTimestamp,
     KeyAssignmentReplacement,
+    ValidatorConsumerPubKey,
+    ValidatorByConsumerAddr,
+    ConsumerAddrsToPrune,
     Chain,
     ThrottledSlashPacket,
     ThrottledPacketDataWrapper,

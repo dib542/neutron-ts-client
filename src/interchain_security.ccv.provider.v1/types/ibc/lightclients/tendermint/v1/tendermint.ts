@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal";
-import { ProofSpec } from "../../../../confio/proofs";
+import { ProofSpec } from "../../../../cosmos/ics23/v1/proofs";
 import { Duration } from "../../../../google/protobuf/duration";
 import { Timestamp } from "../../../../google/protobuf/timestamp";
 import { SignedHeader } from "../../../../tendermint/types/types";
@@ -56,13 +56,15 @@ export interface ClientState {
    */
   upgradePath: string[];
   /**
-   * This flag, when set to true, will allow governance to recover a client
-   * which has expired
+   * allow_update_after_expiry is deprecated
+   *
+   * @deprecated
    */
   allowUpdateAfterExpiry: boolean;
   /**
-   * This flag, when set to true, will allow governance to unfreeze a client
-   * whose chain has experienced a misbehaviour event
+   * allow_update_after_misbehaviour is deprecated
+   *
+   * @deprecated
    */
   allowUpdateAfterMisbehaviour: boolean;
 }
@@ -86,6 +88,11 @@ export interface ConsensusState {
  * that implements Misbehaviour interface expected by ICS-02
  */
 export interface Misbehaviour {
+  /**
+   * ClientID is deprecated
+   *
+   * @deprecated
+   */
   clientId: string;
   header1: Header | undefined;
   header2: Header | undefined;

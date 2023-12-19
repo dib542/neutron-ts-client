@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal";
-import { InfractionType, infractionTypeFromJSON, infractionTypeToJSON } from "../../../cosmos/staking/v1beta1/staking";
+import { Infraction, infractionFromJSON, infractionToJSON } from "../../../cosmos/staking/v1beta1/staking";
 import { Validator, ValidatorUpdate } from "../../../tendermint/abci/types";
 
 export const protobufPackage = "interchain_security.ccv.v1";
@@ -50,6 +50,53 @@ export function consumerPacketDataTypeToJSON(object: ConsumerPacketDataType): st
 }
 
 /**
+ * InfractionType indicates the infraction type a validator commited.
+ * NOTE: ccv.InfractionType to maintain compatibility between ICS versions
+ * using different versions of the cosmos-sdk and ibc-go modules.
+ */
+export enum InfractionType {
+  /** INFRACTION_TYPE_UNSPECIFIED - UNSPECIFIED defines an empty infraction type. */
+  INFRACTION_TYPE_UNSPECIFIED = 0,
+  /** INFRACTION_TYPE_DOUBLE_SIGN - DOUBLE_SIGN defines a validator that double-signs a block. */
+  INFRACTION_TYPE_DOUBLE_SIGN = 1,
+  /** INFRACTION_TYPE_DOWNTIME - DOWNTIME defines a validator that missed signing too many blocks. */
+  INFRACTION_TYPE_DOWNTIME = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function infractionTypeFromJSON(object: any): InfractionType {
+  switch (object) {
+    case 0:
+    case "INFRACTION_TYPE_UNSPECIFIED":
+      return InfractionType.INFRACTION_TYPE_UNSPECIFIED;
+    case 1:
+    case "INFRACTION_TYPE_DOUBLE_SIGN":
+      return InfractionType.INFRACTION_TYPE_DOUBLE_SIGN;
+    case 2:
+    case "INFRACTION_TYPE_DOWNTIME":
+      return InfractionType.INFRACTION_TYPE_DOWNTIME;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return InfractionType.UNRECOGNIZED;
+  }
+}
+
+export function infractionTypeToJSON(object: InfractionType): string {
+  switch (object) {
+    case InfractionType.INFRACTION_TYPE_UNSPECIFIED:
+      return "INFRACTION_TYPE_UNSPECIFIED";
+    case InfractionType.INFRACTION_TYPE_DOUBLE_SIGN:
+      return "INFRACTION_TYPE_DOUBLE_SIGN";
+    case InfractionType.INFRACTION_TYPE_DOWNTIME:
+      return "INFRACTION_TYPE_DOWNTIME";
+    case InfractionType.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+/**
  * This packet is sent from provider chain to consumer chain if the validator
  * set for consumer chain changes (due to new bonding/unbonding messages or
  * slashing events) A VSCMatured packet from consumer chain will be sent
@@ -92,10 +139,13 @@ export interface SlashPacketData {
   /** map to the infraction block height on the provider */
   valsetUpdateId: number;
   /** tell if the slashing is for a downtime or a double-signing infraction */
-  infraction: InfractionType;
+  infraction: Infraction;
 }
 
-/** MaturedUnbondingOps defines a list of ids corresponding to ids of matured unbonding operations. */
+/**
+ * MaturedUnbondingOps defines a list of ids corresponding to ids of matured
+ * unbonding operations.
+ */
 export interface MaturedUnbondingOps {
   ids: number[];
 }
@@ -110,6 +160,30 @@ export interface ConsumerPacketData {
 /** ConsumerPacketDataList is a list of consumer packet data packets. */
 export interface ConsumerPacketDataList {
   list: ConsumerPacketData[];
+}
+
+/**
+ * ConsumerPacketData contains a consumer packet data and a type tag
+ * that is compatible with ICS v1 and v2 over the wire. It is not used for internal storage.
+ */
+export interface ConsumerPacketDataV1 {
+  type: ConsumerPacketDataType;
+  slashPacketData: SlashPacketDataV1 | undefined;
+  vscMaturedPacketData: VSCMaturedPacketData | undefined;
+}
+
+/**
+ * This packet is sent from the consumer chain to the provider chain
+ * It is backward compatible with the ICS v1 and v2 version of the packet.
+ */
+export interface SlashPacketDataV1 {
+  validator:
+    | Validator
+    | undefined;
+  /** map to the infraction block height on the provider */
+  valsetUpdateId: number;
+  /** tell if the slashing is for a downtime or a double-signing infraction */
+  infraction: InfractionType;
 }
 
 function createBaseValidatorSetChangePacketData(): ValidatorSetChangePacketData {
@@ -335,7 +409,7 @@ export const SlashPacketData = {
     return {
       validator: isSet(object.validator) ? Validator.fromJSON(object.validator) : undefined,
       valsetUpdateId: isSet(object.valsetUpdateId) ? Number(object.valsetUpdateId) : 0,
-      infraction: isSet(object.infraction) ? infractionTypeFromJSON(object.infraction) : 0,
+      infraction: isSet(object.infraction) ? infractionFromJSON(object.infraction) : 0,
     };
   },
 
@@ -344,7 +418,7 @@ export const SlashPacketData = {
     message.validator !== undefined
       && (obj.validator = message.validator ? Validator.toJSON(message.validator) : undefined);
     message.valsetUpdateId !== undefined && (obj.valsetUpdateId = Math.round(message.valsetUpdateId));
-    message.infraction !== undefined && (obj.infraction = infractionTypeToJSON(message.infraction));
+    message.infraction !== undefined && (obj.infraction = infractionToJSON(message.infraction));
     return obj;
   },
 
@@ -542,6 +616,154 @@ export const ConsumerPacketDataList = {
   fromPartial<I extends Exact<DeepPartial<ConsumerPacketDataList>, I>>(object: I): ConsumerPacketDataList {
     const message = createBaseConsumerPacketDataList();
     message.list = object.list?.map((e) => ConsumerPacketData.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseConsumerPacketDataV1(): ConsumerPacketDataV1 {
+  return { type: 0, slashPacketData: undefined, vscMaturedPacketData: undefined };
+}
+
+export const ConsumerPacketDataV1 = {
+  encode(message: ConsumerPacketDataV1, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.type !== 0) {
+      writer.uint32(8).int32(message.type);
+    }
+    if (message.slashPacketData !== undefined) {
+      SlashPacketDataV1.encode(message.slashPacketData, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.vscMaturedPacketData !== undefined) {
+      VSCMaturedPacketData.encode(message.vscMaturedPacketData, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ConsumerPacketDataV1 {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseConsumerPacketDataV1();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.type = reader.int32() as any;
+          break;
+        case 2:
+          message.slashPacketData = SlashPacketDataV1.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.vscMaturedPacketData = VSCMaturedPacketData.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ConsumerPacketDataV1 {
+    return {
+      type: isSet(object.type) ? consumerPacketDataTypeFromJSON(object.type) : 0,
+      slashPacketData: isSet(object.slashPacketData) ? SlashPacketDataV1.fromJSON(object.slashPacketData) : undefined,
+      vscMaturedPacketData: isSet(object.vscMaturedPacketData)
+        ? VSCMaturedPacketData.fromJSON(object.vscMaturedPacketData)
+        : undefined,
+    };
+  },
+
+  toJSON(message: ConsumerPacketDataV1): unknown {
+    const obj: any = {};
+    message.type !== undefined && (obj.type = consumerPacketDataTypeToJSON(message.type));
+    message.slashPacketData !== undefined
+      && (obj.slashPacketData = message.slashPacketData
+        ? SlashPacketDataV1.toJSON(message.slashPacketData)
+        : undefined);
+    message.vscMaturedPacketData !== undefined && (obj.vscMaturedPacketData = message.vscMaturedPacketData
+      ? VSCMaturedPacketData.toJSON(message.vscMaturedPacketData)
+      : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ConsumerPacketDataV1>, I>>(object: I): ConsumerPacketDataV1 {
+    const message = createBaseConsumerPacketDataV1();
+    message.type = object.type ?? 0;
+    message.slashPacketData = (object.slashPacketData !== undefined && object.slashPacketData !== null)
+      ? SlashPacketDataV1.fromPartial(object.slashPacketData)
+      : undefined;
+    message.vscMaturedPacketData = (object.vscMaturedPacketData !== undefined && object.vscMaturedPacketData !== null)
+      ? VSCMaturedPacketData.fromPartial(object.vscMaturedPacketData)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseSlashPacketDataV1(): SlashPacketDataV1 {
+  return { validator: undefined, valsetUpdateId: 0, infraction: 0 };
+}
+
+export const SlashPacketDataV1 = {
+  encode(message: SlashPacketDataV1, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.validator !== undefined) {
+      Validator.encode(message.validator, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.valsetUpdateId !== 0) {
+      writer.uint32(16).uint64(message.valsetUpdateId);
+    }
+    if (message.infraction !== 0) {
+      writer.uint32(24).int32(message.infraction);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SlashPacketDataV1 {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSlashPacketDataV1();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.validator = Validator.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.valsetUpdateId = longToNumber(reader.uint64() as Long);
+          break;
+        case 3:
+          message.infraction = reader.int32() as any;
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SlashPacketDataV1 {
+    return {
+      validator: isSet(object.validator) ? Validator.fromJSON(object.validator) : undefined,
+      valsetUpdateId: isSet(object.valsetUpdateId) ? Number(object.valsetUpdateId) : 0,
+      infraction: isSet(object.infraction) ? infractionTypeFromJSON(object.infraction) : 0,
+    };
+  },
+
+  toJSON(message: SlashPacketDataV1): unknown {
+    const obj: any = {};
+    message.validator !== undefined
+      && (obj.validator = message.validator ? Validator.toJSON(message.validator) : undefined);
+    message.valsetUpdateId !== undefined && (obj.valsetUpdateId = Math.round(message.valsetUpdateId));
+    message.infraction !== undefined && (obj.infraction = infractionTypeToJSON(message.infraction));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<SlashPacketDataV1>, I>>(object: I): SlashPacketDataV1 {
+    const message = createBaseSlashPacketDataV1();
+    message.validator = (object.validator !== undefined && object.validator !== null)
+      ? Validator.fromPartial(object.validator)
+      : undefined;
+    message.valsetUpdateId = object.valsetUpdateId ?? 0;
+    message.infraction = object.infraction ?? 0;
     return message;
   },
 };

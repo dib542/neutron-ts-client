@@ -12,6 +12,11 @@ export interface GenesisState {
   factoryDenoms: GenesisDenom[];
 }
 
+/**
+ * GenesisDenom defines a tokenfactory denom that is defined within genesis
+ * state. The structure contains DenomAuthorityMetadata which defines the
+ * denom's admin.
+ */
 export interface GenesisDenom {
   denom: string;
   authorityMetadata: DenomAuthorityMetadata | undefined;

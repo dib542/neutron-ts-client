@@ -19,6 +19,7 @@ import { Supply as typeSupply} from "./types"
 import { DenomUnit as typeDenomUnit} from "./types"
 import { Metadata as typeMetadata} from "./types"
 import { Balance as typeBalance} from "./types"
+import { DenomOwner as typeDenomOwner} from "./types"
 
 export { MsgMultiSend, MsgSend };
 
@@ -149,6 +150,7 @@ class SDKModule {
 						DenomUnit: getStructure(typeDenomUnit.fromPartial({})),
 						Metadata: getStructure(typeMetadata.fromPartial({})),
 						Balance: getStructure(typeBalance.fromPartial({})),
+						DenomOwner: getStructure(typeDenomOwner.fromPartial({})),
 						
 		};
 		client.on('signer-changed',(signer) => {			

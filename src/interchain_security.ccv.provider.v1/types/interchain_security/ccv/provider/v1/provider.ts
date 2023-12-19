@@ -12,9 +12,11 @@ import { PublicKey } from "../../../../tendermint/crypto/keys";
 export const protobufPackage = "interchain_security.ccv.provider.v1";
 
 /**
- * ConsumerAdditionProposal is a governance proposal on the provider chain to spawn a new consumer chain.
- * If it passes, then all validators on the provider chain are expected to validate the consumer chain at spawn time
- * or get slashed. It is recommended that spawn time occurs after the proposal end time.
+ * ConsumerAdditionProposal is a governance proposal on the provider chain to
+ * spawn a new consumer chain. If it passes, then all validators on the provider
+ * chain are expected to validate the consumer chain at spawn time or get
+ * slashed. It is recommended that spawn time occurs after the proposal end
+ * time.
  */
 export interface ConsumerAdditionProposal {
   /** the title of the proposal */
@@ -22,30 +24,34 @@ export interface ConsumerAdditionProposal {
   /** the description of the proposal */
   description: string;
   /**
-   * the proposed chain-id of the new consumer chain, must be different from all other consumer chain ids of the executing
-   * provider chain.
+   * the proposed chain-id of the new consumer chain, must be different from all
+   * other consumer chain ids of the executing provider chain.
    */
   chainId: string;
   /**
    * the proposed initial height of new consumer chain.
-   * For a completely new chain, this will be {0,1}. However, it may be different if this is a chain that is converting to a consumer chain.
+   * For a completely new chain, this will be {0,1}. However, it may be
+   * different if this is a chain that is converting to a consumer chain.
    */
   initialHeight:
     | Height
     | undefined;
   /**
-   * The hash of the consumer chain genesis state without the consumer CCV module genesis params.
-   * It is used for off-chain confirmation of genesis.json validity by validators and other parties.
+   * The hash of the consumer chain genesis state without the consumer CCV
+   * module genesis params. It is used for off-chain confirmation of
+   * genesis.json validity by validators and other parties.
    */
   genesisHash: Uint8Array;
   /**
-   * The hash of the consumer chain binary that should be run by validators on chain initialization.
-   * It is used for off-chain confirmation of binary validity by validators and other parties.
+   * The hash of the consumer chain binary that should be run by validators on
+   * chain initialization. It is used for off-chain confirmation of binary
+   * validity by validators and other parties.
    */
   binaryHash: Uint8Array;
   /**
-   * spawn time is the time on the provider chain at which the consumer chain genesis is finalized and all validators
-   * will be responsible for starting their consumer chain validator node.
+   * spawn time is the time on the provider chain at which the consumer chain
+   * genesis is finalized and all validators will be responsible for starting
+   * their consumer chain validator node.
    */
   spawnTime:
     | Date
@@ -72,8 +78,10 @@ export interface ConsumerAdditionProposal {
    */
   consumerRedistributionFraction: string;
   /**
-   * BlocksPerDistributionTransmission is the number of blocks between ibc-token-transfers from the consumer chain to the provider chain.
-   * On sending transmission event, `consumer_redistribution_fraction` of the accumulated tokens are sent to the consumer redistribution address.
+   * BlocksPerDistributionTransmission is the number of blocks between
+   * ibc-token-transfers from the consumer chain to the provider chain. On
+   * sending transmission event, `consumer_redistribution_fraction` of the
+   * accumulated tokens are sent to the consumer redistribution address.
    */
   blocksPerDistributionTransmission: number;
   /**
@@ -82,12 +90,22 @@ export interface ConsumerAdditionProposal {
    * a ccv enabled consumer chain, the ccv module acts as the staking module.
    */
   historicalEntries: number;
+  /**
+   * The ID of a token transfer channel used for the Reward Distribution
+   * sub-protocol. If DistributionTransmissionChannel == "", a new transfer
+   * channel is created on top of the same connection as the CCV channel.
+   * Note that transfer_channel_id is the ID of the channel end on the consumer
+   * chain. it is most relevant for chains performing a sovereign to consumer
+   * changeover in order to maintan the existing ibc transfer channel
+   */
+  distributionTransmissionChannel: string;
 }
 
 /**
- * ConsumerRemovalProposal is a governance proposal on the provider chain to remove (and stop) a consumer chain.
- * If it passes, all the consumer chain's state is removed from the provider chain. The outstanding unbonding
- * operation funds are released.
+ * ConsumerRemovalProposal is a governance proposal on the provider chain to
+ * remove (and stop) a consumer chain. If it passes, all the consumer chain's
+ * state is removed from the provider chain. The outstanding unbonding operation
+ * funds are released.
  */
 export interface ConsumerRemovalProposal {
   /** the title of the proposal */
@@ -96,7 +114,10 @@ export interface ConsumerRemovalProposal {
   description: string;
   /** the chain-id of the consumer chain to be stopped */
   chainId: string;
-  /** the time on the provider chain at which all validators are responsible to stop their consumer chain validator node */
+  /**
+   * the time on the provider chain at which all validators are responsible to
+   * stop their consumer chain validator node
+   */
   stopTime: Date | undefined;
 }
 
@@ -110,8 +131,9 @@ export interface EquivocationProposal {
 }
 
 /**
- * A persisted queue entry indicating that a slash packet data instance needs to be handled.
- * This type belongs in the "global" queue, to coordinate slash packet handling times between consumers.
+ * A persisted queue entry indicating that a slash packet data instance needs to
+ * be handled. This type belongs in the "global" queue, to coordinate slash
+ * packet handling times between consumers.
  */
 export interface GlobalSlashEntry {
   /**
@@ -132,7 +154,8 @@ export interface GlobalSlashEntry {
    * The provider's consensus address of the validator being slashed.
    * This field is used to obtain validator power in HandleThrottleQueues.
    *
-   * This field is not used in the store key, but is persisted in value bytes, see QueueGlobalSlashEntry.
+   * This field is not used in the store key, but is persisted in value bytes,
+   * see QueueGlobalSlashEntry.
    */
   providerValConsAddr: Uint8Array;
 }
@@ -142,13 +165,19 @@ export interface Params {
   templateClient:
     | ClientState
     | undefined;
-  /** TrustingPeriodFraction is used to compute the consumer and provider IBC client's TrustingPeriod from the chain defined UnbondingPeriod */
+  /**
+   * TrustingPeriodFraction is used to compute the consumer and provider IBC
+   * client's TrustingPeriod from the chain defined UnbondingPeriod
+   */
   trustingPeriodFraction: string;
   /** Sent IBC packets will timeout after this duration */
   ccvTimeoutPeriod:
     | Duration
     | undefined;
-  /** The channel initialization (IBC channel opening handshake) will timeout after this duration */
+  /**
+   * The channel initialization (IBC channel opening handshake) will timeout
+   * after this duration
+   */
   initTimeoutPeriod:
     | Duration
     | undefined;
@@ -166,8 +195,9 @@ export interface Params {
     | Duration
     | undefined;
   /**
-   * The fraction of total voting power that is replenished to the slash meter every replenish period.
-   * This param also serves as a maximum fraction of total voting power that the slash meter can hold.
+   * The fraction of total voting power that is replenished to the slash meter
+   * every replenish period. This param also serves as a maximum fraction of
+   * total voting power that the slash meter can hold.
    */
   slashMeterReplenishFraction: string;
   /**
@@ -185,20 +215,26 @@ export interface HandshakeMetadata {
 }
 
 /**
- * SlashAcks contains addesses of consumer chain validators
+ * SlashAcks contains cons addresses of consumer chain validators
  * successfully slashed on the provider chain
  */
 export interface SlashAcks {
   addresses: string[];
 }
 
-/** ConsumerAdditionProposals holds pending governance proposals on the provider chain to spawn a new chain. */
+/**
+ * ConsumerAdditionProposals holds pending governance proposals on the provider
+ * chain to spawn a new chain.
+ */
 export interface ConsumerAdditionProposals {
   /** proposals waiting for spawn_time to pass */
   pending: ConsumerAdditionProposal[];
 }
 
-/** ConsumerRemovalProposals holds pending governance proposals on the provider chain to remove (and stop) a consumer chain. */
+/**
+ * ConsumerRemovalProposals holds pending governance proposals on the provider
+ * chain to remove (and stop) a consumer chain.
+ */
 export interface ConsumerRemovalProposals {
   /** proposals waiting for stop_time to pass */
   pending: ConsumerRemovalProposal[];
@@ -249,6 +285,38 @@ export interface KeyAssignmentReplacement {
   power: number;
 }
 
+/**
+ * Used to serialize the ValidatorConsumerPubKey index from key assignment
+ * ValidatorConsumerPubKey: (chainID, providerAddr consAddr) -> consumerKey
+ * tmprotocrypto.PublicKey
+ */
+export interface ValidatorConsumerPubKey {
+  chainId: string;
+  providerAddr: Uint8Array;
+  consumerKey: PublicKey | undefined;
+}
+
+/**
+ * Used to serialize the ValidatorConsumerAddr index from key assignment
+ * ValidatorByConsumerAddr: (chainID, consumerAddr consAddr) -> providerAddr
+ * consAddr
+ */
+export interface ValidatorByConsumerAddr {
+  chainId: string;
+  consumerAddr: Uint8Array;
+  providerAddr: Uint8Array;
+}
+
+/**
+ * Used to serialize the ConsumerAddrsToPrune index from key assignment
+ * ConsumerAddrsToPrune: (chainID, vscID uint64) -> consumerAddrs AddressList
+ */
+export interface ConsumerAddrsToPrune {
+  chainId: string;
+  vscId: number;
+  consumerAddrs: AddressList | undefined;
+}
+
 function createBaseConsumerAdditionProposal(): ConsumerAdditionProposal {
   return {
     title: "",
@@ -264,6 +332,7 @@ function createBaseConsumerAdditionProposal(): ConsumerAdditionProposal {
     consumerRedistributionFraction: "",
     blocksPerDistributionTransmission: 0,
     historicalEntries: 0,
+    distributionTransmissionChannel: "",
   };
 }
 
@@ -307,6 +376,9 @@ export const ConsumerAdditionProposal = {
     }
     if (message.historicalEntries !== 0) {
       writer.uint32(104).int64(message.historicalEntries);
+    }
+    if (message.distributionTransmissionChannel !== "") {
+      writer.uint32(114).string(message.distributionTransmissionChannel);
     }
     return writer;
   },
@@ -357,6 +429,9 @@ export const ConsumerAdditionProposal = {
         case 13:
           message.historicalEntries = longToNumber(reader.int64() as Long);
           break;
+        case 14:
+          message.distributionTransmissionChannel = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -386,6 +461,9 @@ export const ConsumerAdditionProposal = {
         ? Number(object.blocksPerDistributionTransmission)
         : 0,
       historicalEntries: isSet(object.historicalEntries) ? Number(object.historicalEntries) : 0,
+      distributionTransmissionChannel: isSet(object.distributionTransmissionChannel)
+        ? String(object.distributionTransmissionChannel)
+        : "",
     };
   },
 
@@ -415,6 +493,8 @@ export const ConsumerAdditionProposal = {
     message.blocksPerDistributionTransmission !== undefined
       && (obj.blocksPerDistributionTransmission = Math.round(message.blocksPerDistributionTransmission));
     message.historicalEntries !== undefined && (obj.historicalEntries = Math.round(message.historicalEntries));
+    message.distributionTransmissionChannel !== undefined
+      && (obj.distributionTransmissionChannel = message.distributionTransmissionChannel);
     return obj;
   },
 
@@ -442,6 +522,7 @@ export const ConsumerAdditionProposal = {
     message.consumerRedistributionFraction = object.consumerRedistributionFraction ?? "";
     message.blocksPerDistributionTransmission = object.blocksPerDistributionTransmission ?? 0;
     message.historicalEntries = object.historicalEntries ?? 0;
+    message.distributionTransmissionChannel = object.distributionTransmissionChannel ?? "";
     return message;
   },
 };
@@ -1486,6 +1567,222 @@ export const KeyAssignmentReplacement = {
       ? PublicKey.fromPartial(object.prevCKey)
       : undefined;
     message.power = object.power ?? 0;
+    return message;
+  },
+};
+
+function createBaseValidatorConsumerPubKey(): ValidatorConsumerPubKey {
+  return { chainId: "", providerAddr: new Uint8Array(), consumerKey: undefined };
+}
+
+export const ValidatorConsumerPubKey = {
+  encode(message: ValidatorConsumerPubKey, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.chainId !== "") {
+      writer.uint32(10).string(message.chainId);
+    }
+    if (message.providerAddr.length !== 0) {
+      writer.uint32(18).bytes(message.providerAddr);
+    }
+    if (message.consumerKey !== undefined) {
+      PublicKey.encode(message.consumerKey, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ValidatorConsumerPubKey {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseValidatorConsumerPubKey();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.chainId = reader.string();
+          break;
+        case 2:
+          message.providerAddr = reader.bytes();
+          break;
+        case 3:
+          message.consumerKey = PublicKey.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ValidatorConsumerPubKey {
+    return {
+      chainId: isSet(object.chainId) ? String(object.chainId) : "",
+      providerAddr: isSet(object.providerAddr) ? bytesFromBase64(object.providerAddr) : new Uint8Array(),
+      consumerKey: isSet(object.consumerKey) ? PublicKey.fromJSON(object.consumerKey) : undefined,
+    };
+  },
+
+  toJSON(message: ValidatorConsumerPubKey): unknown {
+    const obj: any = {};
+    message.chainId !== undefined && (obj.chainId = message.chainId);
+    message.providerAddr !== undefined
+      && (obj.providerAddr = base64FromBytes(
+        message.providerAddr !== undefined ? message.providerAddr : new Uint8Array(),
+      ));
+    message.consumerKey !== undefined
+      && (obj.consumerKey = message.consumerKey ? PublicKey.toJSON(message.consumerKey) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ValidatorConsumerPubKey>, I>>(object: I): ValidatorConsumerPubKey {
+    const message = createBaseValidatorConsumerPubKey();
+    message.chainId = object.chainId ?? "";
+    message.providerAddr = object.providerAddr ?? new Uint8Array();
+    message.consumerKey = (object.consumerKey !== undefined && object.consumerKey !== null)
+      ? PublicKey.fromPartial(object.consumerKey)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseValidatorByConsumerAddr(): ValidatorByConsumerAddr {
+  return { chainId: "", consumerAddr: new Uint8Array(), providerAddr: new Uint8Array() };
+}
+
+export const ValidatorByConsumerAddr = {
+  encode(message: ValidatorByConsumerAddr, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.chainId !== "") {
+      writer.uint32(10).string(message.chainId);
+    }
+    if (message.consumerAddr.length !== 0) {
+      writer.uint32(18).bytes(message.consumerAddr);
+    }
+    if (message.providerAddr.length !== 0) {
+      writer.uint32(26).bytes(message.providerAddr);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ValidatorByConsumerAddr {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseValidatorByConsumerAddr();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.chainId = reader.string();
+          break;
+        case 2:
+          message.consumerAddr = reader.bytes();
+          break;
+        case 3:
+          message.providerAddr = reader.bytes();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ValidatorByConsumerAddr {
+    return {
+      chainId: isSet(object.chainId) ? String(object.chainId) : "",
+      consumerAddr: isSet(object.consumerAddr) ? bytesFromBase64(object.consumerAddr) : new Uint8Array(),
+      providerAddr: isSet(object.providerAddr) ? bytesFromBase64(object.providerAddr) : new Uint8Array(),
+    };
+  },
+
+  toJSON(message: ValidatorByConsumerAddr): unknown {
+    const obj: any = {};
+    message.chainId !== undefined && (obj.chainId = message.chainId);
+    message.consumerAddr !== undefined
+      && (obj.consumerAddr = base64FromBytes(
+        message.consumerAddr !== undefined ? message.consumerAddr : new Uint8Array(),
+      ));
+    message.providerAddr !== undefined
+      && (obj.providerAddr = base64FromBytes(
+        message.providerAddr !== undefined ? message.providerAddr : new Uint8Array(),
+      ));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ValidatorByConsumerAddr>, I>>(object: I): ValidatorByConsumerAddr {
+    const message = createBaseValidatorByConsumerAddr();
+    message.chainId = object.chainId ?? "";
+    message.consumerAddr = object.consumerAddr ?? new Uint8Array();
+    message.providerAddr = object.providerAddr ?? new Uint8Array();
+    return message;
+  },
+};
+
+function createBaseConsumerAddrsToPrune(): ConsumerAddrsToPrune {
+  return { chainId: "", vscId: 0, consumerAddrs: undefined };
+}
+
+export const ConsumerAddrsToPrune = {
+  encode(message: ConsumerAddrsToPrune, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.chainId !== "") {
+      writer.uint32(10).string(message.chainId);
+    }
+    if (message.vscId !== 0) {
+      writer.uint32(16).uint64(message.vscId);
+    }
+    if (message.consumerAddrs !== undefined) {
+      AddressList.encode(message.consumerAddrs, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ConsumerAddrsToPrune {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseConsumerAddrsToPrune();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.chainId = reader.string();
+          break;
+        case 2:
+          message.vscId = longToNumber(reader.uint64() as Long);
+          break;
+        case 3:
+          message.consumerAddrs = AddressList.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ConsumerAddrsToPrune {
+    return {
+      chainId: isSet(object.chainId) ? String(object.chainId) : "",
+      vscId: isSet(object.vscId) ? Number(object.vscId) : 0,
+      consumerAddrs: isSet(object.consumerAddrs) ? AddressList.fromJSON(object.consumerAddrs) : undefined,
+    };
+  },
+
+  toJSON(message: ConsumerAddrsToPrune): unknown {
+    const obj: any = {};
+    message.chainId !== undefined && (obj.chainId = message.chainId);
+    message.vscId !== undefined && (obj.vscId = Math.round(message.vscId));
+    message.consumerAddrs !== undefined
+      && (obj.consumerAddrs = message.consumerAddrs ? AddressList.toJSON(message.consumerAddrs) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ConsumerAddrsToPrune>, I>>(object: I): ConsumerAddrsToPrune {
+    const message = createBaseConsumerAddrsToPrune();
+    message.chainId = object.chainId ?? "";
+    message.vscId = object.vscId ?? 0;
+    message.consumerAddrs = (object.consumerAddrs !== undefined && object.consumerAddrs !== null)
+      ? AddressList.fromPartial(object.consumerAddrs)
+      : undefined;
     return message;
   },
 };

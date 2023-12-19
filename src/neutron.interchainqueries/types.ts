@@ -1,11 +1,11 @@
-import { RegisteredQuery } from "./types/interchainqueries/genesis"
-import { KVKey } from "./types/interchainqueries/genesis"
-import { Params } from "./types/interchainqueries/params"
-import { Transaction } from "./types/interchainqueries/query"
-import { QueryResult } from "./types/interchainqueries/tx"
-import { StorageValue } from "./types/interchainqueries/tx"
-import { Block } from "./types/interchainqueries/tx"
-import { TxValue } from "./types/interchainqueries/tx"
+import { RegisteredQuery } from "./types/neutron/interchainqueries/genesis"
+import { KVKey } from "./types/neutron/interchainqueries/genesis"
+import { Params } from "./types/neutron/interchainqueries/params"
+import { Transaction } from "./types/neutron/interchainqueries/query"
+import { QueryResult } from "./types/neutron/interchainqueries/tx"
+import { StorageValue } from "./types/neutron/interchainqueries/tx"
+import { Block } from "./types/neutron/interchainqueries/tx"
+import { TxValue } from "./types/neutron/interchainqueries/tx"
 
 
 export {     

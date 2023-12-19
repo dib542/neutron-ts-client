@@ -7,9 +7,12 @@ import { Module as CosmosAuthV1Beta1, msgTypes as CosmosAuthV1Beta1MsgTypes } fr
 import { Module as CosmosAuthzV1Beta1, msgTypes as CosmosAuthzV1Beta1MsgTypes } from './cosmos.authz.v1beta1'
 import { Module as CosmosBankV1Beta1, msgTypes as CosmosBankV1Beta1MsgTypes } from './cosmos.bank.v1beta1'
 import { Module as CosmosBaseTendermintV1Beta1, msgTypes as CosmosBaseTendermintV1Beta1MsgTypes } from './cosmos.base.tendermint.v1beta1'
+import { Module as CosmosConsensusV1, msgTypes as CosmosConsensusV1MsgTypes } from './cosmos.consensus.v1'
 import { Module as CosmosCrisisV1Beta1, msgTypes as CosmosCrisisV1Beta1MsgTypes } from './cosmos.crisis.v1beta1'
 import { Module as CosmosEvidenceV1Beta1, msgTypes as CosmosEvidenceV1Beta1MsgTypes } from './cosmos.evidence.v1beta1'
 import { Module as CosmosFeegrantV1Beta1, msgTypes as CosmosFeegrantV1Beta1MsgTypes } from './cosmos.feegrant.v1beta1'
+import { Module as CosmosMintV1Beta1, msgTypes as CosmosMintV1Beta1MsgTypes } from './cosmos.mint.v1beta1'
+import { Module as CosmosNftV1Beta1, msgTypes as CosmosNftV1Beta1MsgTypes } from './cosmos.nft.v1beta1'
 import { Module as CosmosParamsV1Beta1, msgTypes as CosmosParamsV1Beta1MsgTypes } from './cosmos.params.v1beta1'
 import { Module as CosmosSlashingV1Beta1, msgTypes as CosmosSlashingV1Beta1MsgTypes } from './cosmos.slashing.v1beta1'
 import { Module as CosmosTxV1Beta1, msgTypes as CosmosTxV1Beta1MsgTypes } from './cosmos.tx.v1beta1'
@@ -24,21 +27,20 @@ import { Module as IbcCoreClientV1, msgTypes as IbcCoreClientV1MsgTypes } from '
 import { Module as IbcCoreConnectionV1, msgTypes as IbcCoreConnectionV1MsgTypes } from './ibc.core.connection.v1'
 import { Module as InterchainSecurityCcvConsumerV1, msgTypes as InterchainSecurityCcvConsumerV1MsgTypes } from './interchain_security.ccv.consumer.v1'
 import { Module as InterchainSecurityCcvProviderV1, msgTypes as InterchainSecurityCcvProviderV1MsgTypes } from './interchain_security.ccv.provider.v1'
-import { Module as InterchainSecurityCcvV1, msgTypes as InterchainSecurityCcvV1MsgTypes } from './interchain_security.ccv.v1'
 import { Module as NeutronContractmanager, msgTypes as NeutronContractmanagerMsgTypes } from './neutron.contractmanager'
 import { Module as NeutronCron, msgTypes as NeutronCronMsgTypes } from './neutron.cron'
+import { Module as NeutronDex, msgTypes as NeutronDexMsgTypes } from './neutron.dex'
 import { Module as NeutronFeeburner, msgTypes as NeutronFeeburnerMsgTypes } from './neutron.feeburner'
 import { Module as NeutronFeerefunder, msgTypes as NeutronFeerefunderMsgTypes } from './neutron.feerefunder'
 import { Module as NeutronInterchainqueries, msgTypes as NeutronInterchainqueriesMsgTypes } from './neutron.interchainqueries'
-import { Module as NeutronInterchaintxs, msgTypes as NeutronInterchaintxsMsgTypes } from './neutron.interchaintxs'
 import { Module as NeutronInterchaintxsV1, msgTypes as NeutronInterchaintxsV1MsgTypes } from './neutron.interchaintxs.v1'
 import { Module as NeutronTransfer, msgTypes as NeutronTransferMsgTypes } from './neutron.transfer'
 import { Module as OsmosisTokenfactoryV1Beta1, msgTypes as OsmosisTokenfactoryV1Beta1MsgTypes } from './osmosis.tokenfactory.v1beta1'
-import { Module as RouterV1, msgTypes as RouterV1MsgTypes } from './router.v1'
+import { Module as PacketforwardV1, msgTypes as PacketforwardV1MsgTypes } from './packetforward.v1'
 
 
 const Client = IgniteClient.plugin([
-    CosmosAdminmoduleAdminmodule, CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseTendermintV1Beta1, CosmosCrisisV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, CosmwasmWasmV1, GaiaGlobalfeeV1Beta1, IbcApplicationsInterchainAccountsControllerV1, IbcApplicationsInterchainAccountsHostV1, IbcCoreChannelV1, IbcCoreClientV1, IbcCoreConnectionV1, InterchainSecurityCcvConsumerV1, InterchainSecurityCcvProviderV1, InterchainSecurityCcvV1, NeutronContractmanager, NeutronCron, NeutronFeeburner, NeutronFeerefunder, NeutronInterchainqueries, NeutronInterchaintxs, NeutronInterchaintxsV1, NeutronTransfer, OsmosisTokenfactoryV1Beta1, RouterV1
+    CosmosAdminmoduleAdminmodule, CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseTendermintV1Beta1, CosmosConsensusV1, CosmosCrisisV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosMintV1Beta1, CosmosNftV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, CosmwasmWasmV1, GaiaGlobalfeeV1Beta1, IbcApplicationsInterchainAccountsControllerV1, IbcApplicationsInterchainAccountsHostV1, IbcCoreChannelV1, IbcCoreClientV1, IbcCoreConnectionV1, InterchainSecurityCcvConsumerV1, InterchainSecurityCcvProviderV1, NeutronContractmanager, NeutronCron, NeutronDex, NeutronFeeburner, NeutronFeerefunder, NeutronInterchainqueries, NeutronInterchaintxsV1, NeutronTransfer, OsmosisTokenfactoryV1Beta1, PacketforwardV1
 ]);
 
 const registry = new Registry([
@@ -47,9 +49,12 @@ const registry = new Registry([
   ...CosmosAuthzV1Beta1MsgTypes,
   ...CosmosBankV1Beta1MsgTypes,
   ...CosmosBaseTendermintV1Beta1MsgTypes,
+  ...CosmosConsensusV1MsgTypes,
   ...CosmosCrisisV1Beta1MsgTypes,
   ...CosmosEvidenceV1Beta1MsgTypes,
   ...CosmosFeegrantV1Beta1MsgTypes,
+  ...CosmosMintV1Beta1MsgTypes,
+  ...CosmosNftV1Beta1MsgTypes,
   ...CosmosParamsV1Beta1MsgTypes,
   ...CosmosSlashingV1Beta1MsgTypes,
   ...CosmosTxV1Beta1MsgTypes,
@@ -64,17 +69,16 @@ const registry = new Registry([
   ...IbcCoreConnectionV1MsgTypes,
   ...InterchainSecurityCcvConsumerV1MsgTypes,
   ...InterchainSecurityCcvProviderV1MsgTypes,
-  ...InterchainSecurityCcvV1MsgTypes,
   ...NeutronContractmanagerMsgTypes,
   ...NeutronCronMsgTypes,
+  ...NeutronDexMsgTypes,
   ...NeutronFeeburnerMsgTypes,
   ...NeutronFeerefunderMsgTypes,
   ...NeutronInterchainqueriesMsgTypes,
-  ...NeutronInterchaintxsMsgTypes,
   ...NeutronInterchaintxsV1MsgTypes,
   ...NeutronTransferMsgTypes,
   ...OsmosisTokenfactoryV1Beta1MsgTypes,
-  ...RouterV1MsgTypes,
+  ...PacketforwardV1MsgTypes,
   
 ])
 

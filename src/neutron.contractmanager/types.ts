@@ -1,5 +1,5 @@
-import { Failure } from "./types/contractmanager/genesis"
-import { Params } from "./types/contractmanager/params"
+import { Failure } from "./types/neutron/contractmanager/failure"
+import { Params } from "./types/neutron/contractmanager/params"
 
 
 export {     

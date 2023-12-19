@@ -30,6 +30,14 @@ export interface FeerefunderFeeInfoResponse {
   fee_info?: FeerefunderFeeInfo;
 }
 
+/**
+* MsgUpdateParamsResponse defines the response structure for executing a
+MsgUpdateParams message.
+
+Since: 0.47
+*/
+export type FeerefunderMsgUpdateParamsResponse = object;
+
 export interface FeerefunderPacketID {
   channel_id?: string;
   port_id?: string;
@@ -196,7 +204,7 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title feerefunder/fee.proto
+ * @title neutron/feerefunder/fee.proto
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {

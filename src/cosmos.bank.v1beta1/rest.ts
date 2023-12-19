@@ -32,6 +32,21 @@ export interface V1Beta1Coin {
 }
 
 /**
+* DenomOwner defines structure representing an account that owns or holds a
+particular denominated token. It contains the account address and account
+balance of the denominated token.
+
+Since: cosmos-sdk 0.46
+*/
+export interface V1Beta1DenomOwner {
+  /** address defines the address that owns a particular denomination. */
+  address?: string;
+
+  /** balance is the balance of the denominated coin for an account. */
+  balance?: V1Beta1Coin;
+}
+
+/**
 * DenomUnit represents a struct that describes a given
 denomination unit of the basic token.
 */
@@ -42,7 +57,7 @@ export interface V1Beta1DenomUnit {
   /**
    * exponent represents power of 10 exponent that one must
    * raise the base_denom to in order to equal the given DenomUnit's denom
-   * 1 denom = 1^exponent base_denom
+   * 1 denom = 10^exponent base_denom
    * (e.g. with a base_denom of uatom, one can create a DenomUnit of 'atom' with
    * exponent = 6, thus: 1 atom = 10^6 uatom).
    * @format int64
@@ -93,6 +108,21 @@ export interface V1Beta1Metadata {
    * Since: cosmos-sdk 0.43
    */
   symbol?: string;
+
+  /**
+   * URI to a document (on or off-chain) that contains additional information. Optional.
+   *
+   * Since: cosmos-sdk 0.46
+   */
+  uri?: string;
+
+  /**
+   * URIHash is a sha256 hash of a document pointed by URI. It's used to verify that
+   * the document didn't change. Optional.
+   *
+   * Since: cosmos-sdk 0.46
+   */
+  uri_hash?: string;
 }
 
 /**
@@ -104,6 +134,21 @@ export type V1Beta1MsgMultiSendResponse = object;
  * MsgSendResponse defines the Msg/Send response type.
  */
 export type V1Beta1MsgSendResponse = object;
+
+/**
+* MsgSetSendEnabledResponse defines the Msg/SetSendEnabled response type.
+
+Since: cosmos-sdk 0.47
+*/
+export type V1Beta1MsgSetSendEnabledResponse = object;
+
+/**
+* MsgUpdateParamsResponse defines the response structure for executing a
+MsgUpdateParams message.
+
+Since: cosmos-sdk 0.47
+*/
+export type V1Beta1MsgUpdateParamsResponse = object;
 
 /**
  * Output models transaction outputs.
@@ -171,7 +216,8 @@ corresponding request message has used PageRequest.
 export interface V1Beta1PageResponse {
   /**
    * next_key is the key to be passed to PageRequest.key to
-   * query the next page most efficiently
+   * query the next page most efficiently. It will be empty if
+   * there are no more results.
    * @format byte
    */
   next_key?: string;
@@ -188,6 +234,13 @@ export interface V1Beta1PageResponse {
  * Params defines the parameters for the bank module.
  */
 export interface V1Beta1Params {
+  /**
+   * Deprecated: Use of SendEnabled in params is deprecated.
+   * For genesis, use the newly added send_enabled field in the genesis object.
+   * Storage, lookup, and manipulation of this information is now in the keeper.
+   *
+   * As of cosmos-sdk 0.47, this only exists for backwards compatibility of genesis files.
+   */
   send_enabled?: V1Beta1SendEnabled[];
   default_send_enabled?: boolean;
 }
@@ -222,6 +275,18 @@ export interface V1Beta1QueryDenomMetadataResponse {
 }
 
 /**
+* QueryDenomOwnersResponse defines the RPC response of a DenomOwners RPC query.
+
+Since: cosmos-sdk 0.46
+*/
+export interface V1Beta1QueryDenomOwnersResponse {
+  denom_owners?: V1Beta1DenomOwner[];
+
+  /** pagination defines the pagination in the response. */
+  pagination?: V1Beta1PageResponse;
+}
+
+/**
 * QueryDenomsMetadataResponse is the response type for the Query/DenomsMetadata RPC
 method.
 */
@@ -242,8 +307,36 @@ export interface V1Beta1QueryParamsResponse {
 }
 
 /**
+* QuerySendEnabledResponse defines the RPC response of a SendEnable query.
+
+Since: cosmos-sdk 0.47
+*/
+export interface V1Beta1QuerySendEnabledResponse {
+  send_enabled?: V1Beta1SendEnabled[];
+
+  /**
+   * pagination defines the pagination in the response. This field is only
+   * populated if the denoms field in the request is empty.
+   */
+  pagination?: V1Beta1PageResponse;
+}
+
+/**
+* QuerySpendableBalanceByDenomResponse defines the gRPC response structure for
+querying an account's spendable balance for a specific denom.
+
+Since: cosmos-sdk 0.47
+*/
+export interface V1Beta1QuerySpendableBalanceByDenomResponse {
+  /** balance is the balance of the coin. */
+  balance?: V1Beta1Coin;
+}
+
+/**
 * QuerySpendableBalancesResponse defines the gRPC response structure for querying
 an account's spendable balances.
+
+Since: cosmos-sdk 0.46
 */
 export interface V1Beta1QuerySpendableBalancesResponse {
   /** balances is the spendable balances of all the coins. */
@@ -408,7 +501,7 @@ export class HttpClient<SecurityDataType = unknown> {
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   /**
-   * No description
+   * @description When called from another module, this query might consume a high amount of gas if the pagination field is incorrectly set.
    *
    * @tags Query
    * @name QueryAllBalances
@@ -452,13 +545,42 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     });
 
   /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryDenomsMetadata
-   * @summary DenomsMetadata queries the client metadata for all registered coin denominations.
-   * @request GET:/cosmos/bank/v1beta1/denoms_metadata
-   */
+ * @description When called from another module, this query might consume a high amount of gas if the pagination field is incorrectly set. Since: cosmos-sdk 0.46
+ * 
+ * @tags Query
+ * @name QueryDenomOwners
+ * @summary DenomOwners queries for all account addresses that own a particular token
+denomination.
+ * @request GET:/cosmos/bank/v1beta1/denom_owners/{denom}
+ */
+  queryDenomOwners = (
+    denom: string,
+    query?: {
+      "pagination.key"?: string;
+      "pagination.offset"?: string;
+      "pagination.limit"?: string;
+      "pagination.count_total"?: boolean;
+      "pagination.reverse"?: boolean;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.request<V1Beta1QueryDenomOwnersResponse, RpcStatus>({
+      path: `/cosmos/bank/v1beta1/denom_owners/${denom}`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
+  /**
+ * No description
+ * 
+ * @tags Query
+ * @name QueryDenomsMetadata
+ * @summary DenomsMetadata queries the client metadata for all registered coin
+denominations.
+ * @request GET:/cosmos/bank/v1beta1/denoms_metadata
+ */
   queryDenomsMetadata = (
     query?: {
       "pagination.key"?: string;
@@ -510,11 +632,38 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     });
 
   /**
- * No description
+   * @description This query only returns denominations that have specific SendEnabled settings. Any denomination that does not have a specific setting will use the default params.default_send_enabled, and will not be returned by this query. Since: cosmos-sdk 0.47
+   *
+   * @tags Query
+   * @name QuerySendEnabled
+   * @summary SendEnabled queries for SendEnabled entries.
+   * @request GET:/cosmos/bank/v1beta1/send_enabled
+   */
+  querySendEnabled = (
+    query?: {
+      denoms?: string[];
+      "pagination.key"?: string;
+      "pagination.offset"?: string;
+      "pagination.limit"?: string;
+      "pagination.count_total"?: boolean;
+      "pagination.reverse"?: boolean;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.request<V1Beta1QuerySendEnabledResponse, RpcStatus>({
+      path: `/cosmos/bank/v1beta1/send_enabled`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
+  /**
+ * @description When called from another module, this query might consume a high amount of gas if the pagination field is incorrectly set. Since: cosmos-sdk 0.46
  * 
  * @tags Query
  * @name QuerySpendableBalances
- * @summary SpendableBalances queries the spenable balance of all coins for a single
+ * @summary SpendableBalances queries the spendable balance of all coins for a single
 account.
  * @request GET:/cosmos/bank/v1beta1/spendable_balances/{address}
  */
@@ -538,7 +687,25 @@ account.
     });
 
   /**
-   * No description
+ * @description When called from another module, this query might consume a high amount of gas if the pagination field is incorrectly set. Since: cosmos-sdk 0.47
+ * 
+ * @tags Query
+ * @name QuerySpendableBalanceByDenom
+ * @summary SpendableBalanceByDenom queries the spendable balance of a single denom for
+a single account.
+ * @request GET:/cosmos/bank/v1beta1/spendable_balances/{address}/by_denom
+ */
+  querySpendableBalanceByDenom = (address: string, query?: { denom?: string }, params: RequestParams = {}) =>
+    this.request<V1Beta1QuerySpendableBalanceByDenomResponse, RpcStatus>({
+      path: `/cosmos/bank/v1beta1/spendable_balances/${address}/by_denom`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * @description When called from another module, this query might consume a high amount of gas if the pagination field is incorrectly set.
    *
    * @tags Query
    * @name QueryTotalSupply
@@ -564,17 +731,18 @@ account.
     });
 
   /**
-   * No description
+   * @description When called from another module, this query might consume a high amount of gas if the pagination field is incorrectly set.
    *
    * @tags Query
    * @name QuerySupplyOf
    * @summary SupplyOf queries the supply of a single coin.
-   * @request GET:/cosmos/bank/v1beta1/supply/{denom}
+   * @request GET:/cosmos/bank/v1beta1/supply/by_denom
    */
-  querySupplyOf = (denom: string, params: RequestParams = {}) =>
+  querySupplyOf = (query?: { denom?: string }, params: RequestParams = {}) =>
     this.request<V1Beta1QuerySupplyOfResponse, RpcStatus>({
-      path: `/cosmos/bank/v1beta1/supply/${denom}`,
+      path: `/cosmos/bank/v1beta1/supply/by_denom`,
       method: "GET",
+      query: query,
       format: "json",
       ...params,
     });

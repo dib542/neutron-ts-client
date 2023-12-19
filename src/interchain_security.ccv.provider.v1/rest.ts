@@ -51,11 +51,14 @@ export interface Ccvconsumerv1GenesisState {
 
   /** LastTransmissionBlockHeight nil on new chain, filled in on restart. */
   last_transmission_block_height?: V1LastTransmissionBlockHeight;
+
+  /** flag indicating whether the consumer CCV module starts in */
+  preCCV?: boolean;
 }
 
 export interface Ccvconsumerv1Params {
   /**
-   * TODO: Remove enabled flag and find a better way to setup e2e tests
+   * TODO: Remove enabled flag and find a better way to setup integration tests
    * See: https://github.com/cosmos/interchain-security/issues/339
    */
   enabled?: boolean;
@@ -108,17 +111,21 @@ export interface Ccvconsumerv1Params {
 
   /**
    * The threshold for the percentage of validators at the bottom of the set who
-   * can opt out of running the consumer chain without being punished. For example, a
-   * value of 0.05 means that the validators in the bottom 5% of the set can opt out
+   * can opt out of running the consumer chain without being punished. For
+   * example, a value of 0.05 means that the validators in the bottom 5% of the
+   * set can opt out
    */
   soft_opt_out_threshold?: string;
 
-  /** Reward denoms. These are the denominations which are allowed to be sent to the provider as rewards. */
+  /**
+   * Reward denoms. These are the denominations which are allowed to be sent to
+   * the provider as rewards.
+   */
   reward_denoms?: string[];
 
   /**
-   * Provider-originated reward denoms. These are denoms coming from the provider
-   * which are allowed to be used as rewards. e.g. "uatom"
+   * Provider-originated reward denoms. These are denoms coming from the
+   * provider which are allowed to be used as rewards. e.g. "uatom"
    */
   provider_reward_denoms?: string[];
 }
@@ -129,176 +136,6 @@ export interface CryptoPublicKey {
 
   /** @format byte */
   secp256k1?: string;
-}
-
-export enum Ics23HashOp {
-  NO_HASH = "NO_HASH",
-  SHA256 = "SHA256",
-  SHA512 = "SHA512",
-  KECCAK = "KECCAK",
-  RIPEMD160 = "RIPEMD160",
-  BITCOIN = "BITCOIN",
-  SHA512256 = "SHA512_256",
-}
-
-/**
-* InnerSpec contains all store-specific structure info to determine if two proofs from a
-given store are neighbors.
-
-This enables:
-
-isLeftMost(spec: InnerSpec, op: InnerOp)
-isRightMost(spec: InnerSpec, op: InnerOp)
-isLeftNeighbor(spec: InnerSpec, left: InnerOp, right: InnerOp)
-*/
-export interface Ics23InnerSpec {
-  /**
-   * Child order is the ordering of the children node, must count from 0
-   * iavl tree is [0, 1] (left then right)
-   * merk is [0, 2, 1] (left, right, here)
-   */
-  child_order?: number[];
-
-  /** @format int32 */
-  child_size?: number;
-
-  /** @format int32 */
-  min_prefix_length?: number;
-
-  /** @format int32 */
-  max_prefix_length?: number;
-
-  /**
-   * empty child is the prehash image that is used when one child is nil (eg. 20 bytes of 0)
-   * @format byte
-   */
-  empty_child?: string;
-
-  /** hash is the algorithm that must be used for each InnerOp */
-  hash?: Ics23HashOp;
-}
-
-/**
-* *
-LeafOp represents the raw key-value data we wish to prove, and
-must be flexible to represent the internal transformation from
-the original key-value pairs into the basis hash, for many existing
-merkle trees.
-
-key and value are passed in. So that the signature of this operation is:
-leafOp(key, value) -> output
-
-To process this, first prehash the keys and values if needed (ANY means no hash in this case):
-hkey = prehashKey(key)
-hvalue = prehashValue(value)
-
-Then combine the bytes, and hash it
-output = hash(prefix || length(hkey) || hkey || length(hvalue) || hvalue)
-*/
-export interface Ics23LeafOp {
-  hash?: Ics23HashOp;
-  prehash_key?: Ics23HashOp;
-  prehash_value?: Ics23HashOp;
-
-  /**
-   * - NO_PREFIX: NO_PREFIX don't include any length info
-   *  - VAR_PROTO: VAR_PROTO uses protobuf (and go-amino) varint encoding of the length
-   *  - VAR_RLP: VAR_RLP uses rlp int encoding of the length
-   *  - FIXED32_BIG: FIXED32_BIG uses big-endian encoding of the length as a 32 bit integer
-   *  - FIXED32_LITTLE: FIXED32_LITTLE uses little-endian encoding of the length as a 32 bit integer
-   *  - FIXED64_BIG: FIXED64_BIG uses big-endian encoding of the length as a 64 bit integer
-   *  - FIXED64_LITTLE: FIXED64_LITTLE uses little-endian encoding of the length as a 64 bit integer
-   *  - REQUIRE_32_BYTES: REQUIRE_32_BYTES is like NONE, but will fail if the input is not exactly 32 bytes (sha256 output)
-   *  - REQUIRE_64_BYTES: REQUIRE_64_BYTES is like NONE, but will fail if the input is not exactly 64 bytes (sha512 output)
-   */
-  length?: Ics23LengthOp;
-
-  /**
-   * prefix is a fixed bytes that may optionally be included at the beginning to differentiate
-   * a leaf node from an inner node.
-   * @format byte
-   */
-  prefix?: string;
-}
-
-/**
-* - NO_PREFIX: NO_PREFIX don't include any length info
- - VAR_PROTO: VAR_PROTO uses protobuf (and go-amino) varint encoding of the length
- - VAR_RLP: VAR_RLP uses rlp int encoding of the length
- - FIXED32_BIG: FIXED32_BIG uses big-endian encoding of the length as a 32 bit integer
- - FIXED32_LITTLE: FIXED32_LITTLE uses little-endian encoding of the length as a 32 bit integer
- - FIXED64_BIG: FIXED64_BIG uses big-endian encoding of the length as a 64 bit integer
- - FIXED64_LITTLE: FIXED64_LITTLE uses little-endian encoding of the length as a 64 bit integer
- - REQUIRE_32_BYTES: REQUIRE_32_BYTES is like NONE, but will fail if the input is not exactly 32 bytes (sha256 output)
- - REQUIRE_64_BYTES: REQUIRE_64_BYTES is like NONE, but will fail if the input is not exactly 64 bytes (sha512 output)
-*/
-export enum Ics23LengthOp {
-  NO_PREFIX = "NO_PREFIX",
-  VAR_PROTO = "VAR_PROTO",
-  VAR_RLP = "VAR_RLP",
-  FIXED32BIG = "FIXED32_BIG",
-  FIXED32LITTLE = "FIXED32_LITTLE",
-  FIXED64BIG = "FIXED64_BIG",
-  FIXED64LITTLE = "FIXED64_LITTLE",
-  REQUIRE32BYTES = "REQUIRE_32_BYTES",
-  REQUIRE64BYTES = "REQUIRE_64_BYTES",
-}
-
-/**
-* *
-ProofSpec defines what the expected parameters are for a given proof type.
-This can be stored in the client and used to validate any incoming proofs.
-
-verify(ProofSpec, Proof) -> Proof | Error
-
-As demonstrated in tests, if we don't fix the algorithm used to calculate the
-LeafHash for a given tree, there are many possible key-value pairs that can
-generate a given hash (by interpretting the preimage differently).
-We need this for proper security, requires client knows a priori what
-tree format server uses. But not in code, rather a configuration object.
-*/
-export interface Ics23ProofSpec {
-  /**
-   * any field in the ExistenceProof must be the same as in this spec.
-   * except Prefix, which is just the first bytes of prefix (spec can be longer)
-   * *
-   * LeafOp represents the raw key-value data we wish to prove, and
-   * must be flexible to represent the internal transformation from
-   * the original key-value pairs into the basis hash, for many existing
-   * merkle trees.
-   *
-   * key and value are passed in. So that the signature of this operation is:
-   * leafOp(key, value) -> output
-   * To process this, first prehash the keys and values if needed (ANY means no hash in this case):
-   * hkey = prehashKey(key)
-   * hvalue = prehashValue(value)
-   * Then combine the bytes, and hash it
-   * output = hash(prefix || length(hkey) || hkey || length(hvalue) || hvalue)
-   */
-  leaf_spec?: Ics23LeafOp;
-
-  /**
-   * InnerSpec contains all store-specific structure info to determine if two proofs from a
-   * given store are neighbors.
-   *
-   * This enables:
-   * isLeftMost(spec: InnerSpec, op: InnerOp)
-   * isRightMost(spec: InnerSpec, op: InnerOp)
-   * isLeftNeighbor(spec: InnerSpec, left: InnerOp, right: InnerOp)
-   */
-  inner_spec?: Ics23InnerSpec;
-
-  /**
-   * max_depth (if > 0) is the maximum number of InnerOps allowed (mainly for fixed-depth tries)
-   * @format int32
-   */
-  max_depth?: number;
-
-  /**
-   * min_depth (if > 0) is the minimum number of InnerOps allowed (mainly for fixed-depth tries)
-   * @format int32
-   */
-  min_depth?: number;
 }
 
 /**
@@ -490,7 +327,7 @@ export interface V1ClientState {
   latest_height?: V1Height;
 
   /** Proof specifications used in verifying counterparty state */
-  proof_specs?: Ics23ProofSpec[];
+  proof_specs?: V1ProofSpec[];
 
   /**
    * Path at which next upgraded client will be committed.
@@ -503,16 +340,10 @@ export interface V1ClientState {
    */
   upgrade_path?: string[];
 
-  /**
-   * This flag, when set to true, will allow governance to recover a client
-   * which has expired
-   */
+  /** allow_update_after_expiry is deprecated */
   allow_update_after_expiry?: boolean;
 
-  /**
-   * This flag, when set to true, will allow governance to unfreeze a client
-   * whose chain has experienced a misbehaviour event
-   */
+  /** allow_update_after_misbehaviour is deprecated */
   allow_update_after_misbehaviour?: boolean;
 }
 
@@ -539,9 +370,11 @@ export interface V1ConsensusState {
 }
 
 /**
-* ConsumerAdditionProposal is a governance proposal on the provider chain to spawn a new consumer chain.
-If it passes, then all validators on the provider chain are expected to validate the consumer chain at spawn time
-or get slashed. It is recommended that spawn time occurs after the proposal end time.
+* ConsumerAdditionProposal is a governance proposal on the provider chain to
+spawn a new consumer chain. If it passes, then all validators on the provider
+chain are expected to validate the consumer chain at spawn time or get
+slashed. It is recommended that spawn time occurs after the proposal end
+time.
 */
 export interface V1ConsumerAdditionProposal {
   /** the title of the proposal */
@@ -551,34 +384,38 @@ export interface V1ConsumerAdditionProposal {
   description?: string;
 
   /**
-   * the proposed chain-id of the new consumer chain, must be different from all other consumer chain ids of the executing
-   * provider chain.
+   * the proposed chain-id of the new consumer chain, must be different from all
+   * other consumer chain ids of the executing provider chain.
    */
   chain_id?: string;
 
   /**
    * the proposed initial height of new consumer chain.
-   * For a completely new chain, this will be {0,1}. However, it may be different if this is a chain that is converting to a consumer chain.
+   * For a completely new chain, this will be {0,1}. However, it may be
+   * different if this is a chain that is converting to a consumer chain.
    */
   initial_height?: V1Height;
 
   /**
-   * The hash of the consumer chain genesis state without the consumer CCV module genesis params.
-   * It is used for off-chain confirmation of genesis.json validity by validators and other parties.
+   * The hash of the consumer chain genesis state without the consumer CCV
+   * module genesis params. It is used for off-chain confirmation of
+   * genesis.json validity by validators and other parties.
    * @format byte
    */
   genesis_hash?: string;
 
   /**
-   * The hash of the consumer chain binary that should be run by validators on chain initialization.
-   * It is used for off-chain confirmation of binary validity by validators and other parties.
+   * The hash of the consumer chain binary that should be run by validators on
+   * chain initialization. It is used for off-chain confirmation of binary
+   * validity by validators and other parties.
    * @format byte
    */
   binary_hash?: string;
 
   /**
-   * spawn time is the time on the provider chain at which the consumer chain genesis is finalized and all validators
-   * will be responsible for starting their consumer chain validator node.
+   * spawn time is the time on the provider chain at which the consumer chain
+   * genesis is finalized and all validators will be responsible for starting
+   * their consumer chain validator node.
    * @format date-time
    */
   spawn_time?: string;
@@ -603,8 +440,10 @@ export interface V1ConsumerAdditionProposal {
   consumer_redistribution_fraction?: string;
 
   /**
-   * BlocksPerDistributionTransmission is the number of blocks between ibc-token-transfers from the consumer chain to the provider chain.
-   * On sending transmission event, `consumer_redistribution_fraction` of the accumulated tokens are sent to the consumer redistribution address.
+   * BlocksPerDistributionTransmission is the number of blocks between
+   * ibc-token-transfers from the consumer chain to the provider chain. On
+   * sending transmission event, `consumer_redistribution_fraction` of the
+   * accumulated tokens are sent to the consumer redistribution address.
    * @format int64
    */
   blocks_per_distribution_transmission?: string;
@@ -616,11 +455,22 @@ export interface V1ConsumerAdditionProposal {
    * @format int64
    */
   historical_entries?: string;
+
+  /**
+   * The ID of a token transfer channel used for the Reward Distribution
+   * sub-protocol. If DistributionTransmissionChannel == "", a new transfer
+   * channel is created on top of the same connection as the CCV channel.
+   * Note that transfer_channel_id is the ID of the channel end on the consumer
+   * chain. it is most relevant for chains performing a sovereign to consumer
+   * changeover in order to maintan the existing ibc transfer channel
+   */
+  distribution_transmission_channel?: string;
 }
 
 /**
- * ConsumerAdditionProposals holds pending governance proposals on the provider chain to spawn a new chain.
- */
+* ConsumerAdditionProposals holds pending governance proposals on the provider
+chain to spawn a new chain.
+*/
 export interface V1ConsumerAdditionProposals {
   /** proposals waiting for spawn_time to pass */
   pending?: V1ConsumerAdditionProposal[];
@@ -671,9 +521,10 @@ export enum V1ConsumerPacketDataType {
 }
 
 /**
-* ConsumerRemovalProposal is a governance proposal on the provider chain to remove (and stop) a consumer chain.
-If it passes, all the consumer chain's state is removed from the provider chain. The outstanding unbonding
-operation funds are released.
+* ConsumerRemovalProposal is a governance proposal on the provider chain to
+remove (and stop) a consumer chain. If it passes, all the consumer chain's
+state is removed from the provider chain. The outstanding unbonding operation
+funds are released.
 */
 export interface V1ConsumerRemovalProposal {
   /** the title of the proposal */
@@ -686,15 +537,17 @@ export interface V1ConsumerRemovalProposal {
   chain_id?: string;
 
   /**
-   * the time on the provider chain at which all validators are responsible to stop their consumer chain validator node
+   * the time on the provider chain at which all validators are responsible to
+   * stop their consumer chain validator node
    * @format date-time
    */
   stop_time?: string;
 }
 
 /**
- * ConsumerRemovalProposals holds pending governance proposals on the provider chain to remove (and stop) a consumer chain.
- */
+* ConsumerRemovalProposals holds pending governance proposals on the provider
+chain to remove (and stop) a consumer chain.
+*/
 export interface V1ConsumerRemovalProposals {
   /** proposals waiting for stop_time to pass */
   pending?: V1ConsumerRemovalProposal[];
@@ -713,8 +566,9 @@ export interface V1Fraction {
 }
 
 /**
-* A persisted queue entry indicating that a slash packet data instance needs to be handled.
-This type belongs in the "global" queue, to coordinate slash packet handling times between consumers.
+* A persisted queue entry indicating that a slash packet data instance needs to
+be handled. This type belongs in the "global" queue, to coordinate slash
+packet handling times between consumers.
 */
 export interface V1GlobalSlashEntry {
   /**
@@ -738,10 +592,21 @@ export interface V1GlobalSlashEntry {
    * The provider's consensus address of the validator being slashed.
    * This field is used to obtain validator power in HandleThrottleQueues.
    *
-   * This field is not used in the store key, but is persisted in value bytes, see QueueGlobalSlashEntry.
+   * This field is not used in the store key, but is persisted in value bytes,
+   * see QueueGlobalSlashEntry.
    * @format byte
    */
   provider_val_cons_addr?: string;
+}
+
+export enum V1HashOp {
+  NO_HASH = "NO_HASH",
+  SHA256 = "SHA256",
+  SHA512 = "SHA512",
+  KECCAK = "KECCAK",
+  RIPEMD160 = "RIPEMD160",
+  BITCOIN = "BITCOIN",
+  SHA512256 = "SHA512_256",
 }
 
 /**
@@ -774,9 +639,112 @@ export interface V1HeightToValsetUpdateID {
   valset_update_id?: string;
 }
 
+/**
+* InnerSpec contains all store-specific structure info to determine if two proofs from a
+given store are neighbors.
+
+This enables:
+
+isLeftMost(spec: InnerSpec, op: InnerOp)
+isRightMost(spec: InnerSpec, op: InnerOp)
+isLeftNeighbor(spec: InnerSpec, left: InnerOp, right: InnerOp)
+*/
+export interface V1InnerSpec {
+  /**
+   * Child order is the ordering of the children node, must count from 0
+   * iavl tree is [0, 1] (left then right)
+   * merk is [0, 2, 1] (left, right, here)
+   */
+  child_order?: number[];
+
+  /** @format int32 */
+  child_size?: number;
+
+  /** @format int32 */
+  min_prefix_length?: number;
+
+  /** @format int32 */
+  max_prefix_length?: number;
+
+  /**
+   * empty child is the prehash image that is used when one child is nil (eg. 20 bytes of 0)
+   * @format byte
+   */
+  empty_child?: string;
+
+  /** hash is the algorithm that must be used for each InnerOp */
+  hash?: V1HashOp;
+}
+
 export interface V1LastTransmissionBlockHeight {
   /** @format int64 */
   height?: string;
+}
+
+/**
+* *
+LeafOp represents the raw key-value data we wish to prove, and
+must be flexible to represent the internal transformation from
+the original key-value pairs into the basis hash, for many existing
+merkle trees.
+
+key and value are passed in. So that the signature of this operation is:
+leafOp(key, value) -> output
+
+To process this, first prehash the keys and values if needed (ANY means no hash in this case):
+hkey = prehashKey(key)
+hvalue = prehashValue(value)
+
+Then combine the bytes, and hash it
+output = hash(prefix || length(hkey) || hkey || length(hvalue) || hvalue)
+*/
+export interface V1LeafOp {
+  hash?: V1HashOp;
+  prehash_key?: V1HashOp;
+  prehash_value?: V1HashOp;
+
+  /**
+   * - NO_PREFIX: NO_PREFIX don't include any length info
+   *  - VAR_PROTO: VAR_PROTO uses protobuf (and go-amino) varint encoding of the length
+   *  - VAR_RLP: VAR_RLP uses rlp int encoding of the length
+   *  - FIXED32_BIG: FIXED32_BIG uses big-endian encoding of the length as a 32 bit integer
+   *  - FIXED32_LITTLE: FIXED32_LITTLE uses little-endian encoding of the length as a 32 bit integer
+   *  - FIXED64_BIG: FIXED64_BIG uses big-endian encoding of the length as a 64 bit integer
+   *  - FIXED64_LITTLE: FIXED64_LITTLE uses little-endian encoding of the length as a 64 bit integer
+   *  - REQUIRE_32_BYTES: REQUIRE_32_BYTES is like NONE, but will fail if the input is not exactly 32 bytes (sha256 output)
+   *  - REQUIRE_64_BYTES: REQUIRE_64_BYTES is like NONE, but will fail if the input is not exactly 64 bytes (sha512 output)
+   */
+  length?: V1LengthOp;
+
+  /**
+   * prefix is a fixed bytes that may optionally be included at the beginning to differentiate
+   * a leaf node from an inner node.
+   * @format byte
+   */
+  prefix?: string;
+}
+
+/**
+* - NO_PREFIX: NO_PREFIX don't include any length info
+ - VAR_PROTO: VAR_PROTO uses protobuf (and go-amino) varint encoding of the length
+ - VAR_RLP: VAR_RLP uses rlp int encoding of the length
+ - FIXED32_BIG: FIXED32_BIG uses big-endian encoding of the length as a 32 bit integer
+ - FIXED32_LITTLE: FIXED32_LITTLE uses little-endian encoding of the length as a 32 bit integer
+ - FIXED64_BIG: FIXED64_BIG uses big-endian encoding of the length as a 64 bit integer
+ - FIXED64_LITTLE: FIXED64_LITTLE uses little-endian encoding of the length as a 64 bit integer
+ - REQUIRE_32_BYTES: REQUIRE_32_BYTES is like NONE, but will fail if the input is not exactly 32 bytes (sha256 output)
+ - REQUIRE_64_BYTES: REQUIRE_64_BYTES is like NONE, but will fail if the input is not exactly 64 bytes (sha512 output)
+*/
+export enum V1LengthOp {
+  NO_PREFIX = "NO_PREFIX",
+  VAR_PROTO = "VAR_PROTO",
+  VAR_RLP = "VAR_RLP",
+  FIXED32BIG = "FIXED32_BIG",
+  FIXED32LITTLE = "FIXED32_LITTLE",
+  FIXED64BIG = "FIXED64_BIG",
+  FIXED64LITTLE = "FIXED64_LITTLE",
+  REQUIRE32BYTES = "REQUIRE_32_BYTES",
+  REQUIRE64BYTES = "REQUIRE_64_BYTES",
 }
 
 export interface V1MaturingVSCPacket {
@@ -799,8 +767,9 @@ export interface V1MerkleRoot {
 export type V1MsgAssignConsumerKeyResponse = object;
 
 /**
- * MsgRegisterConsumerRewardDenomResponse defines the Msg/RegisterConsumerRewardDenom response type.
- */
+* MsgRegisterConsumerRewardDenomResponse defines the
+Msg/RegisterConsumerRewardDenom response type.
+*/
 export type V1MsgRegisterConsumerRewardDenomResponse = object;
 
 /**
@@ -811,13 +780,76 @@ export interface V1OutstandingDowntime {
   validator_consensus_address?: string;
 }
 
+/**
+* *
+ProofSpec defines what the expected parameters are for a given proof type.
+This can be stored in the client and used to validate any incoming proofs.
+
+verify(ProofSpec, Proof) -> Proof | Error
+
+As demonstrated in tests, if we don't fix the algorithm used to calculate the
+LeafHash for a given tree, there are many possible key-value pairs that can
+generate a given hash (by interpretting the preimage differently).
+We need this for proper security, requires client knows a priori what
+tree format server uses. But not in code, rather a configuration object.
+*/
+export interface V1ProofSpec {
+  /**
+   * any field in the ExistenceProof must be the same as in this spec.
+   * except Prefix, which is just the first bytes of prefix (spec can be longer)
+   * *
+   * LeafOp represents the raw key-value data we wish to prove, and
+   * must be flexible to represent the internal transformation from
+   * the original key-value pairs into the basis hash, for many existing
+   * merkle trees.
+   *
+   * key and value are passed in. So that the signature of this operation is:
+   * leafOp(key, value) -> output
+   * To process this, first prehash the keys and values if needed (ANY means no hash in this case):
+   * hkey = prehashKey(key)
+   * hvalue = prehashValue(value)
+   * Then combine the bytes, and hash it
+   * output = hash(prefix || length(hkey) || hkey || length(hvalue) || hvalue)
+   */
+  leaf_spec?: V1LeafOp;
+
+  /**
+   * InnerSpec contains all store-specific structure info to determine if two proofs from a
+   * given store are neighbors.
+   *
+   * This enables:
+   * isLeftMost(spec: InnerSpec, op: InnerOp)
+   * isRightMost(spec: InnerSpec, op: InnerOp)
+   * isLeftNeighbor(spec: InnerSpec, left: InnerOp, right: InnerOp)
+   */
+  inner_spec?: V1InnerSpec;
+
+  /**
+   * max_depth (if > 0) is the maximum number of InnerOps allowed (mainly for fixed-depth tries)
+   * @format int32
+   */
+  max_depth?: number;
+
+  /**
+   * min_depth (if > 0) is the minimum number of InnerOps allowed (mainly for fixed-depth tries)
+   * @format int32
+   */
+  min_depth?: number;
+}
+
 export interface V1QueryConsumerChainStartProposalsResponse {
-  /** ConsumerAdditionProposals holds pending governance proposals on the provider chain to spawn a new chain. */
+  /**
+   * ConsumerAdditionProposals holds pending governance proposals on the provider
+   * chain to spawn a new chain.
+   */
   proposals?: V1ConsumerAdditionProposals;
 }
 
 export interface V1QueryConsumerChainStopProposalsResponse {
-  /** ConsumerRemovalProposals holds pending governance proposals on the provider chain to remove (and stop) a consumer chain. */
+  /**
+   * ConsumerRemovalProposals holds pending governance proposals on the provider
+   * chain to remove (and stop) a consumer chain.
+   */
   proposals?: V1ConsumerRemovalProposals;
 }
 
@@ -841,14 +873,15 @@ export interface V1QueryThrottleStateResponse {
   slash_meter?: string;
 
   /**
-   * allowance of voting power units (int) that the slash meter is given per replenish period
-   * this also serves as the max value for the meter.
+   * allowance of voting power units (int) that the slash meter is given per
+   * replenish period this also serves as the max value for the meter.
    * @format int64
    */
   slash_meter_allowance?: string;
 
   /**
-   * next time the slash meter could potentially be replenished, iff it's not full
+   * next time the slash meter could potentially be replenished, iff it's not
+   * full
    * @format date-time
    */
   next_replenish_candidate?: string;
@@ -891,13 +924,13 @@ export interface V1SlashPacketData {
 
   /**
    * tell if the slashing is for a downtime or a double-signing infraction
-   * InfractionType indicates the infraction type a validator commited.
+   * Infraction indicates the infraction a validator commited.
    *
-   *  - INFRACTION_TYPE_UNSPECIFIED: UNSPECIFIED defines an empty infraction type.
-   *  - INFRACTION_TYPE_DOUBLE_SIGN: DOUBLE_SIGN defines a validator that double-signs a block.
-   *  - INFRACTION_TYPE_DOWNTIME: DOWNTIME defines a validator that missed signing too many blocks.
+   *  - INFRACTION_UNSPECIFIED: UNSPECIFIED defines an empty infraction.
+   *  - INFRACTION_DOUBLE_SIGN: DOUBLE_SIGN defines a validator that double-signs a block.
+   *  - INFRACTION_DOWNTIME: DOWNTIME defines a validator that missed signing too many blocks.
    */
-  infraction?: V1Beta1InfractionType;
+  infraction?: V1Beta1Infraction;
 }
 
 export interface V1ThrottledPacketDataWrapper {
@@ -916,12 +949,14 @@ export interface V1ThrottledPacketDataWrapper {
 }
 
 /**
- * A query wrapper type for the global entry and data relevant to a throttled slash packet.
- */
+* A query wrapper type for the global entry and data relevant to a throttled
+slash packet.
+*/
 export interface V1ThrottledSlashPacket {
   /**
-   * A persisted queue entry indicating that a slash packet data instance needs to be handled.
-   * This type belongs in the "global" queue, to coordinate slash packet handling times between consumers.
+   * A persisted queue entry indicating that a slash packet data instance needs to
+   * be handled. This type belongs in the "global" queue, to coordinate slash
+   * packet handling times between consumers.
    */
   global_entry?: V1GlobalSlashEntry;
 
@@ -946,16 +981,16 @@ export interface V1VSCMaturedPacketData {
 }
 
 /**
-* InfractionType indicates the infraction type a validator commited.
+* Infraction indicates the infraction a validator commited.
 
- - INFRACTION_TYPE_UNSPECIFIED: UNSPECIFIED defines an empty infraction type.
- - INFRACTION_TYPE_DOUBLE_SIGN: DOUBLE_SIGN defines a validator that double-signs a block.
- - INFRACTION_TYPE_DOWNTIME: DOWNTIME defines a validator that missed signing too many blocks.
+ - INFRACTION_UNSPECIFIED: UNSPECIFIED defines an empty infraction.
+ - INFRACTION_DOUBLE_SIGN: DOUBLE_SIGN defines a validator that double-signs a block.
+ - INFRACTION_DOWNTIME: DOWNTIME defines a validator that missed signing too many blocks.
 */
-export enum V1Beta1InfractionType {
-  INFRACTION_TYPE_UNSPECIFIED = "INFRACTION_TYPE_UNSPECIFIED",
-  INFRACTION_TYPE_DOUBLE_SIGN = "INFRACTION_TYPE_DOUBLE_SIGN",
-  INFRACTION_TYPE_DOWNTIME = "INFRACTION_TYPE_DOWNTIME",
+export enum V1Beta1Infraction {
+  INFRACTION_UNSPECIFIED = "INFRACTION_UNSPECIFIED",
+  INFRACTION_DOUBLE_SIGN = "INFRACTION_DOUBLE_SIGN",
+  INFRACTION_DOWNTIME = "INFRACTION_DOWNTIME",
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
@@ -1154,8 +1189,8 @@ whose proposal has been accepted
  * 
  * @tags Query
  * @name QueryQueryThrottledConsumerPacketData
- * @summary QueryThrottledConsumerPacketData returns a list of pending packet data instances
-(slash packet and vsc matured) for a single consumer chain
+ * @summary QueryThrottledConsumerPacketData returns a list of pending packet data
+instances (slash packet and vsc matured) for a single consumer chain
  * @request GET:/interchain_security/ccv/provider/pending_consumer_packets
  */
   queryQueryThrottledConsumerPacketData = (query?: { chain_id?: string }, params: RequestParams = {}) =>
@@ -1168,13 +1203,14 @@ whose proposal has been accepted
     });
 
   /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryQueryRegisteredConsumerRewardDenoms
-   * @summary QueryRegisteredConsumerRewardDenoms returns a list of consumer reward denoms that are registered
-   * @request GET:/interchain_security/ccv/provider/registered_consumer_reward_denoms
-   */
+ * No description
+ * 
+ * @tags Query
+ * @name QueryQueryRegisteredConsumerRewardDenoms
+ * @summary QueryRegisteredConsumerRewardDenoms returns a list of consumer reward
+denoms that are registered
+ * @request GET:/interchain_security/ccv/provider/registered_consumer_reward_denoms
+ */
   queryQueryRegisteredConsumerRewardDenoms = (params: RequestParams = {}) =>
     this.request<V1QueryRegisteredConsumerRewardDenomsResponse, RpcStatus>({
       path: `/interchain_security/ccv/provider/registered_consumer_reward_denoms`,
@@ -1184,13 +1220,14 @@ whose proposal has been accepted
     });
 
   /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryQueryThrottleState
-   * @summary QueryThrottleState returns the main on-chain state relevant to currently throttled slash packets
-   * @request GET:/interchain_security/ccv/provider/throttle_state
-   */
+ * No description
+ * 
+ * @tags Query
+ * @name QueryQueryThrottleState
+ * @summary QueryThrottleState returns the main on-chain state relevant to currently
+throttled slash packets
+ * @request GET:/interchain_security/ccv/provider/throttle_state
+ */
   queryQueryThrottleState = (params: RequestParams = {}) =>
     this.request<V1QueryThrottleStateResponse, RpcStatus>({
       path: `/interchain_security/ccv/provider/throttle_state`,

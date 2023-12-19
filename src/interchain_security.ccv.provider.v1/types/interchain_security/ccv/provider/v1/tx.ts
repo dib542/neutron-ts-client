@@ -29,7 +29,10 @@ export interface MsgRegisterConsumerRewardDenom {
   depositor: string;
 }
 
-/** MsgRegisterConsumerRewardDenomResponse defines the Msg/RegisterConsumerRewardDenom response type. */
+/**
+ * MsgRegisterConsumerRewardDenomResponse defines the
+ * Msg/RegisterConsumerRewardDenom response type.
+ */
 export interface MsgRegisterConsumerRewardDenomResponse {
 }
 

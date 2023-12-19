@@ -325,7 +325,11 @@ export type V1MsgUpgradeClientResponse = object;
  * Params defines the set of IBC light client parameters.
  */
 export interface V1Params {
-  /** allowed_clients defines the list of allowed client state types. */
+  /**
+   * allowed_clients defines the list of allowed client state types which can be created
+   * and interacted with. If a client type is removed from the allowed clients list, usage
+   * of this client will be disabled until it is added again to the list.
+   */
   allowed_clients?: string[];
 }
 
@@ -737,6 +741,13 @@ export interface V1Beta1PageRequest {
    * is set.
    */
   count_total?: boolean;
+
+  /**
+   * reverse is set to true if results are to be returned in the descending order.
+   *
+   * Since: cosmos-sdk 0.43
+   */
+  reverse?: boolean;
 }
 
 /**
@@ -751,7 +762,8 @@ corresponding request message has used PageRequest.
 export interface V1Beta1PageResponse {
   /**
    * next_key is the key to be passed to PageRequest.key to
-   * query the next page most efficiently
+   * query the next page most efficiently. It will be empty if
+   * there are no more results.
    * @format byte
    */
   next_key?: string;
@@ -893,22 +905,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * No description
    *
    * @tags Query
-   * @name QueryClientParams
-   * @summary ClientParams queries all parameters of the ibc client.
-   * @request GET:/ibc/client/v1/params
-   */
-  queryClientParams = (params: RequestParams = {}) =>
-    this.request<V1QueryClientParamsResponse, RpcStatus>({
-      path: `/ibc/client/v1/params`,
-      method: "GET",
-      format: "json",
-      ...params,
-    });
-
-  /**
-   * No description
-   *
-   * @tags Query
    * @name QueryClientStates
    * @summary ClientStates queries all the IBC light clients of a chain.
    * @request GET:/ibc/core/client/v1/client_states
@@ -919,6 +915,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       "pagination.offset"?: string;
       "pagination.limit"?: string;
       "pagination.count_total"?: boolean;
+      "pagination.reverse"?: boolean;
     },
     params: RequestParams = {},
   ) =>
@@ -978,6 +975,7 @@ client.
       "pagination.offset"?: string;
       "pagination.limit"?: string;
       "pagination.count_total"?: boolean;
+      "pagination.reverse"?: boolean;
     },
     params: RequestParams = {},
   ) =>
@@ -1004,6 +1002,7 @@ client.
       "pagination.offset"?: string;
       "pagination.limit"?: string;
       "pagination.count_total"?: boolean;
+      "pagination.reverse"?: boolean;
     },
     params: RequestParams = {},
   ) =>
@@ -1035,6 +1034,22 @@ a given height.
       path: `/ibc/core/client/v1/consensus_states/${clientId}/revision/${revisionNumber}/height/${revisionHeight}`,
       method: "GET",
       query: query,
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryClientParams
+   * @summary ClientParams queries all parameters of the ibc client submodule.
+   * @request GET:/ibc/core/client/v1/params
+   */
+  queryClientParams = (params: RequestParams = {}) =>
+    this.request<V1QueryClientParamsResponse, RpcStatus>({
+      path: `/ibc/core/client/v1/params`,
+      method: "GET",
       format: "json",
       ...params,
     });

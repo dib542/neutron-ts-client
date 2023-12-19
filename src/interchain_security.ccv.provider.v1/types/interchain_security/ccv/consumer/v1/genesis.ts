@@ -40,7 +40,11 @@ export interface GenesisState {
     | ConsumerPacketDataList
     | undefined;
   /** LastTransmissionBlockHeight nil on new chain, filled in on restart. */
-  lastTransmissionBlockHeight: LastTransmissionBlockHeight | undefined;
+  lastTransmissionBlockHeight:
+    | LastTransmissionBlockHeight
+    | undefined;
+  /** flag indicating whether the consumer CCV module starts in */
+  preCCV: boolean;
 }
 
 /**
@@ -74,6 +78,7 @@ function createBaseGenesisState(): GenesisState {
     outstandingDowntimeSlashing: [],
     pendingConsumerPackets: undefined,
     lastTransmissionBlockHeight: undefined,
+    preCCV: false,
   };
 }
 
@@ -114,6 +119,9 @@ export const GenesisState = {
     }
     if (message.lastTransmissionBlockHeight !== undefined) {
       LastTransmissionBlockHeight.encode(message.lastTransmissionBlockHeight, writer.uint32(98).fork()).ldelim();
+    }
+    if (message.preCCV === true) {
+      writer.uint32(104).bool(message.preCCV);
     }
     return writer;
   },
@@ -161,6 +169,9 @@ export const GenesisState = {
         case 12:
           message.lastTransmissionBlockHeight = LastTransmissionBlockHeight.decode(reader, reader.uint32());
           break;
+        case 13:
+          message.preCCV = reader.bool();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -199,6 +210,7 @@ export const GenesisState = {
       lastTransmissionBlockHeight: isSet(object.lastTransmissionBlockHeight)
         ? LastTransmissionBlockHeight.fromJSON(object.lastTransmissionBlockHeight)
         : undefined,
+      preCCV: isSet(object.preCCV) ? Boolean(object.preCCV) : false,
     };
   },
 
@@ -245,6 +257,7 @@ export const GenesisState = {
       && (obj.lastTransmissionBlockHeight = message.lastTransmissionBlockHeight
         ? LastTransmissionBlockHeight.toJSON(message.lastTransmissionBlockHeight)
         : undefined);
+    message.preCCV !== undefined && (obj.preCCV = message.preCCV);
     return obj;
   },
 
@@ -277,6 +290,7 @@ export const GenesisState = {
       (object.lastTransmissionBlockHeight !== undefined && object.lastTransmissionBlockHeight !== null)
         ? LastTransmissionBlockHeight.fromPartial(object.lastTransmissionBlockHeight)
         : undefined;
+    message.preCCV = object.preCCV ?? false;
     return message;
   },
 };

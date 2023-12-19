@@ -9,6 +9,30 @@
  * ---------------------------------------------------------------
  */
 
+/**
+ * Params defines the parameters for the tokenfactory module.
+ */
+export interface Osmosistokenfactoryv1Beta1Params {
+  /**
+   * DenomCreationFee defines the fee to be charged on the creation of a new
+   * denom. The fee is drawn from the MsgCreateDenom's sender account, and
+   * transferred to the community pool.
+   */
+  denom_creation_fee?: V1Beta1Coin[];
+
+  /**
+   * DenomCreationGasConsume defines the gas cost for creating a new denom.
+   * This is intended as a spam deterrence mechanism.
+   *
+   * See: https://github.com/CosmWasm/token-factory/issues/11
+   * @format uint64
+   */
+  denom_creation_gas_consume?: string;
+
+  /** FeeCollectorAddress is the address where fees collected from denom creation are sent to */
+  fee_collector_address?: string;
+}
+
 export interface ProtobufAny {
   "@type"?: string;
 }
@@ -41,24 +65,125 @@ export interface V1Beta1DenomAuthorityMetadata {
   Admin?: string;
 }
 
+/**
+* DenomUnit represents a struct that describes a given
+denomination unit of the basic token.
+*/
+export interface V1Beta1DenomUnit {
+  /** denom represents the string name of the given denom unit (e.g uatom). */
+  denom?: string;
+
+  /**
+   * exponent represents power of 10 exponent that one must
+   * raise the base_denom to in order to equal the given DenomUnit's denom
+   * 1 denom = 10^exponent base_denom
+   * (e.g. with a base_denom of uatom, one can create a DenomUnit of 'atom' with
+   * exponent = 6, thus: 1 atom = 10^6 uatom).
+   * @format int64
+   */
+  exponent?: number;
+
+  /** aliases is a list of string aliases for the given denom */
+  aliases?: string[];
+}
+
+/**
+* Metadata represents a struct that describes
+a basic token.
+*/
+export interface V1Beta1Metadata {
+  description?: string;
+
+  /** denom_units represents the list of DenomUnit's for a given coin */
+  denom_units?: V1Beta1DenomUnit[];
+
+  /** base represents the base denom (should be the DenomUnit with exponent = 0). */
+  base?: string;
+
+  /**
+   * display indicates the suggested denom that should be
+   * displayed in clients.
+   */
+  display?: string;
+
+  /**
+   * name defines the name of the token (eg: Cosmos Atom)
+   * Since: cosmos-sdk 0.43
+   */
+  name?: string;
+
+  /**
+   * symbol is the token symbol usually shown on exchanges (eg: ATOM). This can
+   * be the same as the display.
+   *
+   * Since: cosmos-sdk 0.43
+   */
+  symbol?: string;
+
+  /**
+   * URI to a document (on or off-chain) that contains additional information. Optional.
+   *
+   * Since: cosmos-sdk 0.46
+   */
+  uri?: string;
+
+  /**
+   * URIHash is a sha256 hash of a document pointed by URI. It's used to verify that
+   * the document didn't change. Optional.
+   *
+   * Since: cosmos-sdk 0.46
+   */
+  uri_hash?: string;
+}
+
 export type V1Beta1MsgBurnResponse = object;
 
+/**
+* MsgChangeAdminResponse defines the response structure for an executed
+MsgChangeAdmin message.
+*/
 export type V1Beta1MsgChangeAdminResponse = object;
 
 export interface V1Beta1MsgCreateDenomResponse {
   new_token_denom?: string;
 }
 
+export type V1Beta1MsgForceTransferResponse = object;
+
 export type V1Beta1MsgMintResponse = object;
 
-export interface V1Beta1Params {
-  /** DenomCreationFee is the fee required to create a new denom using the tokenfactory module */
-  denom_creation_fee?: V1Beta1Coin[];
+/**
+* MsgSetBeforeSendHookResponse defines the response structure for an executed
+MsgSetBeforeSendHook message.
+*/
+export type V1Beta1MsgSetBeforeSendHookResponse = object;
 
-  /** FeeCollectorAddress is the address where fees collected from denom creation are sent to */
-  fee_collector_address?: string;
+/**
+* MsgSetDenomMetadataResponse defines the response structure for an executed
+MsgSetDenomMetadata message.
+*/
+export type V1Beta1MsgSetDenomMetadataResponse = object;
+
+/**
+* MsgUpdateParamsResponse defines the response structure for executing a
+MsgUpdateParams message.
+
+Since: 0.47
+*/
+export type V1Beta1MsgUpdateParamsResponse = object;
+
+/**
+* QueryBeforeSendHookAddressResponse defines the response structure for the
+DenomBeforeSendHook gRPC query.
+*/
+export interface V1Beta1QueryBeforeSendHookAddressResponse {
+  contract_addr?: string;
 }
 
+/**
+* QueryDenomAuthorityMetadataResponse defines the response structure for the
+DenomAuthorityMetadata gRPC query.
+*/
 export interface V1Beta1QueryDenomAuthorityMetadataResponse {
   /**
    * DenomAuthorityMetadata specifies metadata for addresses that have specific
@@ -68,6 +193,10 @@ export interface V1Beta1QueryDenomAuthorityMetadataResponse {
   authority_metadata?: V1Beta1DenomAuthorityMetadata;
 }
 
+/**
+* QueryDenomsFromCreatorRequest defines the response structure for the
+DenomsFromCreator gRPC query.
+*/
 export interface V1Beta1QueryDenomsFromCreatorResponse {
   denoms?: string[];
 }
@@ -77,7 +206,7 @@ export interface V1Beta1QueryDenomsFromCreatorResponse {
  */
 export interface V1Beta1QueryParamsResponse {
   /** params defines the parameters of the module. */
-  params?: V1Beta1Params;
+  params?: Osmosistokenfactoryv1Beta1Params;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
@@ -206,12 +335,14 @@ export class HttpClient<SecurityDataType = unknown> {
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryDenomAuthorityMetadata
-   * @request GET:/osmosis/tokenfactory/v1beta1/denoms/factory/{creator}/{subdenom}/authority_metadata
-   */
+ * No description
+ * 
+ * @tags Query
+ * @name QueryDenomAuthorityMetadata
+ * @summary DenomAuthorityMetadata defines a gRPC query method for fetching
+DenomAuthorityMetadata for a particular denom.
+ * @request GET:/osmosis/tokenfactory/v1beta1/denoms/factory/{creator}/{subdenom}/authority_metadata
+ */
   queryDenomAuthorityMetadata = (creator: string, subdenom: string, params: RequestParams = {}) =>
     this.request<V1Beta1QueryDenomAuthorityMetadataResponse, RpcStatus>({
       path: `/osmosis/tokenfactory/v1beta1/denoms/factory/${creator}/${subdenom}/authority_metadata`,
@@ -221,12 +352,31 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     });
 
   /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryDenomsFromCreator
-   * @request GET:/osmosis/tokenfactory/v1beta1/denoms_from_creator/{creator}
-   */
+ * No description
+ * 
+ * @tags Query
+ * @name QueryBeforeSendHookAddress
+ * @summary BeforeSendHookAddress defines a gRPC query method for
+getting the address registered for the before send hook.
+ * @request GET:/osmosis/tokenfactory/v1beta1/denoms/factory/{creator}/{subdenom}/before_send_hook
+ */
+  queryBeforeSendHookAddress = (creator: string, subdenom: string, params: RequestParams = {}) =>
+    this.request<V1Beta1QueryBeforeSendHookAddressResponse, RpcStatus>({
+      path: `/osmosis/tokenfactory/v1beta1/denoms/factory/${creator}/${subdenom}/before_send_hook`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  /**
+ * No description
+ * 
+ * @tags Query
+ * @name QueryDenomsFromCreator
+ * @summary DenomsFromCreator defines a gRPC query method for fetching all
+denominations created by a specific admin/creator.
+ * @request GET:/osmosis/tokenfactory/v1beta1/denoms_from_creator/{creator}
+ */
   queryDenomsFromCreator = (creator: string, params: RequestParams = {}) =>
     this.request<V1Beta1QueryDenomsFromCreatorResponse, RpcStatus>({
       path: `/osmosis/tokenfactory/v1beta1/denoms_from_creator/${creator}`,
@@ -236,13 +386,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     });
 
   /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryParams
-   * @summary Params returns the total set of minting parameters.
-   * @request GET:/osmosis/tokenfactory/v1beta1/params
-   */
+ * No description
+ * 
+ * @tags Query
+ * @name QueryParams
+ * @summary Params defines a gRPC query method that returns the tokenfactory module's
+parameters.
+ * @request GET:/osmosis/tokenfactory/v1beta1/params
+ */
   queryParams = (params: RequestParams = {}) =>
     this.request<V1Beta1QueryParamsResponse, RpcStatus>({
       path: `/osmosis/tokenfactory/v1beta1/params`,

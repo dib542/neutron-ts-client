@@ -1,15 +1,16 @@
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal";
-import { PublicKey } from "../../../../tendermint/crypto/keys";
 import { GenesisState as GenesisState1 } from "../../consumer/v1/genesis";
 import { MaturedUnbondingOps, ValidatorSetChangePacketData } from "../../v1/ccv";
 import {
-  AddressList,
   ConsumerAdditionProposal,
+  ConsumerAddrsToPrune,
   ConsumerRemovalProposal,
   Params,
   UnbondingOp,
+  ValidatorByConsumerAddr,
+  ValidatorConsumerPubKey,
   VscUnbondingOps,
 } from "./provider";
 
@@ -58,10 +59,16 @@ export interface ConsumerState {
   consumerGenesis:
     | GenesisState1
     | undefined;
-  /** PendingValsetChanges defines the pending validator set changes for the consumer chain */
+  /**
+   * PendingValsetChanges defines the pending validator set changes for the
+   * consumer chain
+   */
   pendingValsetChanges: ValidatorSetChangePacketData[];
   slashDowntimeAck: string[];
-  /** UnbondingOpsIndex defines the unbonding operations waiting on this consumer chain */
+  /**
+   * UnbondingOpsIndex defines the unbonding operations waiting on this consumer
+   * chain
+   */
   unbondingOpsIndex: VscUnbondingOps[];
 }
 
@@ -72,36 +79,6 @@ export interface ConsumerState {
 export interface ValsetUpdateIdToHeight {
   valsetUpdateId: number;
   height: number;
-}
-
-/**
- * Used to serialize the ValidatorConsumerPubKey index from key assignment
- * ValidatorConsumerPubKey: (chainID, providerAddr consAddr) -> consumerKey tmprotocrypto.PublicKey
- */
-export interface ValidatorConsumerPubKey {
-  chainId: string;
-  providerAddr: Uint8Array;
-  consumerKey: PublicKey | undefined;
-}
-
-/**
- * Used to serialize the ValidatorConsumerAddr index from key assignment
- * ValidatorByConsumerAddr: (chainID, consumerAddr consAddr) -> providerAddr consAddr
- */
-export interface ValidatorByConsumerAddr {
-  chainId: string;
-  consumerAddr: Uint8Array;
-  providerAddr: Uint8Array;
-}
-
-/**
- * Used to serialize the ConsumerAddrsToPrune index from key assignment
- * ConsumerAddrsToPrune: (chainID, vscID uint64) -> consumerAddrs AddressList
- */
-export interface ConsumerAddrsToPrune {
-  chainId: string;
-  vscId: number;
-  consumerAddrs: AddressList | undefined;
 }
 
 function createBaseGenesisState(): GenesisState {
@@ -531,222 +508,6 @@ export const ValsetUpdateIdToHeight = {
   },
 };
 
-function createBaseValidatorConsumerPubKey(): ValidatorConsumerPubKey {
-  return { chainId: "", providerAddr: new Uint8Array(), consumerKey: undefined };
-}
-
-export const ValidatorConsumerPubKey = {
-  encode(message: ValidatorConsumerPubKey, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.chainId !== "") {
-      writer.uint32(10).string(message.chainId);
-    }
-    if (message.providerAddr.length !== 0) {
-      writer.uint32(18).bytes(message.providerAddr);
-    }
-    if (message.consumerKey !== undefined) {
-      PublicKey.encode(message.consumerKey, writer.uint32(26).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ValidatorConsumerPubKey {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseValidatorConsumerPubKey();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.chainId = reader.string();
-          break;
-        case 2:
-          message.providerAddr = reader.bytes();
-          break;
-        case 3:
-          message.consumerKey = PublicKey.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ValidatorConsumerPubKey {
-    return {
-      chainId: isSet(object.chainId) ? String(object.chainId) : "",
-      providerAddr: isSet(object.providerAddr) ? bytesFromBase64(object.providerAddr) : new Uint8Array(),
-      consumerKey: isSet(object.consumerKey) ? PublicKey.fromJSON(object.consumerKey) : undefined,
-    };
-  },
-
-  toJSON(message: ValidatorConsumerPubKey): unknown {
-    const obj: any = {};
-    message.chainId !== undefined && (obj.chainId = message.chainId);
-    message.providerAddr !== undefined
-      && (obj.providerAddr = base64FromBytes(
-        message.providerAddr !== undefined ? message.providerAddr : new Uint8Array(),
-      ));
-    message.consumerKey !== undefined
-      && (obj.consumerKey = message.consumerKey ? PublicKey.toJSON(message.consumerKey) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<ValidatorConsumerPubKey>, I>>(object: I): ValidatorConsumerPubKey {
-    const message = createBaseValidatorConsumerPubKey();
-    message.chainId = object.chainId ?? "";
-    message.providerAddr = object.providerAddr ?? new Uint8Array();
-    message.consumerKey = (object.consumerKey !== undefined && object.consumerKey !== null)
-      ? PublicKey.fromPartial(object.consumerKey)
-      : undefined;
-    return message;
-  },
-};
-
-function createBaseValidatorByConsumerAddr(): ValidatorByConsumerAddr {
-  return { chainId: "", consumerAddr: new Uint8Array(), providerAddr: new Uint8Array() };
-}
-
-export const ValidatorByConsumerAddr = {
-  encode(message: ValidatorByConsumerAddr, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.chainId !== "") {
-      writer.uint32(10).string(message.chainId);
-    }
-    if (message.consumerAddr.length !== 0) {
-      writer.uint32(18).bytes(message.consumerAddr);
-    }
-    if (message.providerAddr.length !== 0) {
-      writer.uint32(26).bytes(message.providerAddr);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ValidatorByConsumerAddr {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseValidatorByConsumerAddr();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.chainId = reader.string();
-          break;
-        case 2:
-          message.consumerAddr = reader.bytes();
-          break;
-        case 3:
-          message.providerAddr = reader.bytes();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ValidatorByConsumerAddr {
-    return {
-      chainId: isSet(object.chainId) ? String(object.chainId) : "",
-      consumerAddr: isSet(object.consumerAddr) ? bytesFromBase64(object.consumerAddr) : new Uint8Array(),
-      providerAddr: isSet(object.providerAddr) ? bytesFromBase64(object.providerAddr) : new Uint8Array(),
-    };
-  },
-
-  toJSON(message: ValidatorByConsumerAddr): unknown {
-    const obj: any = {};
-    message.chainId !== undefined && (obj.chainId = message.chainId);
-    message.consumerAddr !== undefined
-      && (obj.consumerAddr = base64FromBytes(
-        message.consumerAddr !== undefined ? message.consumerAddr : new Uint8Array(),
-      ));
-    message.providerAddr !== undefined
-      && (obj.providerAddr = base64FromBytes(
-        message.providerAddr !== undefined ? message.providerAddr : new Uint8Array(),
-      ));
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<ValidatorByConsumerAddr>, I>>(object: I): ValidatorByConsumerAddr {
-    const message = createBaseValidatorByConsumerAddr();
-    message.chainId = object.chainId ?? "";
-    message.consumerAddr = object.consumerAddr ?? new Uint8Array();
-    message.providerAddr = object.providerAddr ?? new Uint8Array();
-    return message;
-  },
-};
-
-function createBaseConsumerAddrsToPrune(): ConsumerAddrsToPrune {
-  return { chainId: "", vscId: 0, consumerAddrs: undefined };
-}
-
-export const ConsumerAddrsToPrune = {
-  encode(message: ConsumerAddrsToPrune, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.chainId !== "") {
-      writer.uint32(10).string(message.chainId);
-    }
-    if (message.vscId !== 0) {
-      writer.uint32(16).uint64(message.vscId);
-    }
-    if (message.consumerAddrs !== undefined) {
-      AddressList.encode(message.consumerAddrs, writer.uint32(26).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ConsumerAddrsToPrune {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseConsumerAddrsToPrune();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.chainId = reader.string();
-          break;
-        case 2:
-          message.vscId = longToNumber(reader.uint64() as Long);
-          break;
-        case 3:
-          message.consumerAddrs = AddressList.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ConsumerAddrsToPrune {
-    return {
-      chainId: isSet(object.chainId) ? String(object.chainId) : "",
-      vscId: isSet(object.vscId) ? Number(object.vscId) : 0,
-      consumerAddrs: isSet(object.consumerAddrs) ? AddressList.fromJSON(object.consumerAddrs) : undefined,
-    };
-  },
-
-  toJSON(message: ConsumerAddrsToPrune): unknown {
-    const obj: any = {};
-    message.chainId !== undefined && (obj.chainId = message.chainId);
-    message.vscId !== undefined && (obj.vscId = Math.round(message.vscId));
-    message.consumerAddrs !== undefined
-      && (obj.consumerAddrs = message.consumerAddrs ? AddressList.toJSON(message.consumerAddrs) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<ConsumerAddrsToPrune>, I>>(object: I): ConsumerAddrsToPrune {
-    const message = createBaseConsumerAddrsToPrune();
-    message.chainId = object.chainId ?? "";
-    message.vscId = object.vscId ?? 0;
-    message.consumerAddrs = (object.consumerAddrs !== undefined && object.consumerAddrs !== null)
-      ? AddressList.fromPartial(object.consumerAddrs)
-      : undefined;
-    return message;
-  },
-};
-
 declare var self: any | undefined;
 declare var window: any | undefined;
 declare var global: any | undefined;
@@ -765,31 +526,6 @@ var globalThis: any = (() => {
   }
   throw "Unable to locate global object";
 })();
-
-function bytesFromBase64(b64: string): Uint8Array {
-  if (globalThis.Buffer) {
-    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
-  } else {
-    const bin = globalThis.atob(b64);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; ++i) {
-      arr[i] = bin.charCodeAt(i);
-    }
-    return arr;
-  }
-}
-
-function base64FromBytes(arr: Uint8Array): string {
-  if (globalThis.Buffer) {
-    return globalThis.Buffer.from(arr).toString("base64");
-  } else {
-    const bin: string[] = [];
-    arr.forEach((byte) => {
-      bin.push(String.fromCharCode(byte));
-    });
-    return globalThis.btoa(bin.join(""));
-  }
-}
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 

@@ -23,6 +23,14 @@ export interface RpcStatus {
 export type V1Beta1MsgUnjailResponse = object;
 
 /**
+* MsgUpdateParamsResponse defines the response structure for executing a
+MsgUpdateParams message.
+
+Since: cosmos-sdk 0.47
+*/
+export type V1Beta1MsgUpdateParamsResponse = object;
+
+/**
 * message SomeRequest {
          Foo some_parameter = 1;
          PageRequest pagination = 2;
@@ -80,7 +88,8 @@ corresponding request message has used PageRequest.
 export interface V1Beta1PageResponse {
   /**
    * next_key is the key to be passed to PageRequest.key to
-   * query the next page most efficiently
+   * query the next page most efficiently. It will be empty if
+   * there are no more results.
    * @format byte
    */
   next_key?: string;
@@ -149,15 +158,15 @@ export interface V1Beta1ValidatorSigningInfo {
   address?: string;
 
   /**
-   * Height at which validator was first a candidate OR was unjailed
+   * Height at which validator was first a candidate OR was un-jailed
    * @format int64
    */
   start_height?: string;
 
   /**
-   * Index which is incremented each time the validator was a bonded
-   * in a block and may have signed a precommit or not. This in conjunction with the
-   * `SignedBlocksWindow` param determines the index in the `MissedBlocksBitArray`.
+   * Index which is incremented every time a validator is bonded in a block and
+   * _may_ have signed a pre-commit or not. This in conjunction with the
+   * signed_blocks_window param determines the index in the missed block bitmap.
    * @format int64
    */
   index_offset?: string;
@@ -169,14 +178,15 @@ export interface V1Beta1ValidatorSigningInfo {
   jailed_until?: string;
 
   /**
-   * Whether or not a validator has been tombstoned (killed out of validator set). It is set
-   * once the validator commits an equivocation or for any other configured misbehiavor.
+   * Whether or not a validator has been tombstoned (killed out of validator
+   * set). It is set once the validator commits an equivocation or for any other
+   * configured misbehavior.
    */
   tombstoned?: boolean;
 
   /**
-   * A counter kept to avoid unnecessary array reads.
-   * Note that `Sum(MissedBlocksBitArray)` always equals `MissedBlocksCounter`.
+   * A counter of missed (unsigned) blocks. It is used to avoid unnecessary
+   * reads in the missed block bitmap.
    * @format int64
    */
   missed_blocks_counter?: string;

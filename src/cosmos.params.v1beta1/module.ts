@@ -10,6 +10,7 @@ import { Api } from "./rest";
 
 import { ParameterChangeProposal as typeParameterChangeProposal} from "./types"
 import { ParamChange as typeParamChange} from "./types"
+import { Subspace as typeSubspace} from "./types"
 
 export {  };
 
@@ -69,6 +70,7 @@ class SDKModule {
 		this.structure =  {
 						ParameterChangeProposal: getStructure(typeParameterChangeProposal.fromPartial({})),
 						ParamChange: getStructure(typeParamChange.fromPartial({})),
+						Subspace: getStructure(typeSubspace.fromPartial({})),
 						
 		};
 		client.on('signer-changed',(signer) => {			

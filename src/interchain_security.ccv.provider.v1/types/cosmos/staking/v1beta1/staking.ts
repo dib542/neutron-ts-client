@@ -60,44 +60,44 @@ export function bondStatusToJSON(object: BondStatus): string {
   }
 }
 
-/** InfractionType indicates the infraction type a validator commited. */
-export enum InfractionType {
-  /** INFRACTION_TYPE_UNSPECIFIED - UNSPECIFIED defines an empty infraction type. */
-  INFRACTION_TYPE_UNSPECIFIED = 0,
-  /** INFRACTION_TYPE_DOUBLE_SIGN - DOUBLE_SIGN defines a validator that double-signs a block. */
-  INFRACTION_TYPE_DOUBLE_SIGN = 1,
-  /** INFRACTION_TYPE_DOWNTIME - DOWNTIME defines a validator that missed signing too many blocks. */
-  INFRACTION_TYPE_DOWNTIME = 2,
+/** Infraction indicates the infraction a validator commited. */
+export enum Infraction {
+  /** INFRACTION_UNSPECIFIED - UNSPECIFIED defines an empty infraction. */
+  INFRACTION_UNSPECIFIED = 0,
+  /** INFRACTION_DOUBLE_SIGN - DOUBLE_SIGN defines a validator that double-signs a block. */
+  INFRACTION_DOUBLE_SIGN = 1,
+  /** INFRACTION_DOWNTIME - DOWNTIME defines a validator that missed signing too many blocks. */
+  INFRACTION_DOWNTIME = 2,
   UNRECOGNIZED = -1,
 }
 
-export function infractionTypeFromJSON(object: any): InfractionType {
+export function infractionFromJSON(object: any): Infraction {
   switch (object) {
     case 0:
-    case "INFRACTION_TYPE_UNSPECIFIED":
-      return InfractionType.INFRACTION_TYPE_UNSPECIFIED;
+    case "INFRACTION_UNSPECIFIED":
+      return Infraction.INFRACTION_UNSPECIFIED;
     case 1:
-    case "INFRACTION_TYPE_DOUBLE_SIGN":
-      return InfractionType.INFRACTION_TYPE_DOUBLE_SIGN;
+    case "INFRACTION_DOUBLE_SIGN":
+      return Infraction.INFRACTION_DOUBLE_SIGN;
     case 2:
-    case "INFRACTION_TYPE_DOWNTIME":
-      return InfractionType.INFRACTION_TYPE_DOWNTIME;
+    case "INFRACTION_DOWNTIME":
+      return Infraction.INFRACTION_DOWNTIME;
     case -1:
     case "UNRECOGNIZED":
     default:
-      return InfractionType.UNRECOGNIZED;
+      return Infraction.UNRECOGNIZED;
   }
 }
 
-export function infractionTypeToJSON(object: InfractionType): string {
+export function infractionToJSON(object: Infraction): string {
   switch (object) {
-    case InfractionType.INFRACTION_TYPE_UNSPECIFIED:
-      return "INFRACTION_TYPE_UNSPECIFIED";
-    case InfractionType.INFRACTION_TYPE_DOUBLE_SIGN:
-      return "INFRACTION_TYPE_DOUBLE_SIGN";
-    case InfractionType.INFRACTION_TYPE_DOWNTIME:
-      return "INFRACTION_TYPE_DOWNTIME";
-    case InfractionType.UNRECOGNIZED:
+    case Infraction.INFRACTION_UNSPECIFIED:
+      return "INFRACTION_UNSPECIFIED";
+    case Infraction.INFRACTION_DOUBLE_SIGN:
+      return "INFRACTION_DOUBLE_SIGN";
+    case Infraction.INFRACTION_DOWNTIME:
+      return "INFRACTION_DOWNTIME";
+    case Infraction.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
   }
@@ -190,7 +190,11 @@ export interface Validator {
   commission:
     | Commission
     | undefined;
-  /** min_self_delegation is the validator's self declared minimum self delegation. */
+  /**
+   * min_self_delegation is the validator's self declared minimum self delegation.
+   *
+   * Since: cosmos-sdk 0.46
+   */
   minSelfDelegation: string;
   /** strictly positive if this validator's unbonding has been stopped by external modules */
   unbondingOnHoldRefCount: number;
@@ -313,7 +317,7 @@ export interface Redelegation {
   entries: RedelegationEntry[];
 }
 
-/** Params defines the parameters for the staking module. */
+/** Params defines the parameters for the x/staking module. */
 export interface Params {
   /** unbonding_time is the time duration of unbonding. */
   unbondingTime:
@@ -327,6 +331,8 @@ export interface Params {
   historicalEntries: number;
   /** bond_denom defines the bondable coin denomination. */
   bondDenom: string;
+  /** min_commission_rate is the chain-wide minimum commission rate that a validator can charge their delegators */
+  minCommissionRate: string;
 }
 
 /**
@@ -367,7 +373,10 @@ export interface Pool {
   bondedTokens: string;
 }
 
-/** ValidatorUpdates defines an array of abci.ValidatorUpdate objects. */
+/**
+ * ValidatorUpdates defines an array of abci.ValidatorUpdate objects.
+ * TODO: explore moving this to proto/cosmos/base to separate modules from tendermint dependence
+ */
 export interface ValidatorUpdates {
   updates: ValidatorUpdate[];
 }
@@ -1546,7 +1555,14 @@ export const Redelegation = {
 };
 
 function createBaseParams(): Params {
-  return { unbondingTime: undefined, maxValidators: 0, maxEntries: 0, historicalEntries: 0, bondDenom: "" };
+  return {
+    unbondingTime: undefined,
+    maxValidators: 0,
+    maxEntries: 0,
+    historicalEntries: 0,
+    bondDenom: "",
+    minCommissionRate: "",
+  };
 }
 
 export const Params = {
@@ -1565,6 +1581,9 @@ export const Params = {
     }
     if (message.bondDenom !== "") {
       writer.uint32(42).string(message.bondDenom);
+    }
+    if (message.minCommissionRate !== "") {
+      writer.uint32(50).string(message.minCommissionRate);
     }
     return writer;
   },
@@ -1591,6 +1610,9 @@ export const Params = {
         case 5:
           message.bondDenom = reader.string();
           break;
+        case 6:
+          message.minCommissionRate = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1606,6 +1628,7 @@ export const Params = {
       maxEntries: isSet(object.maxEntries) ? Number(object.maxEntries) : 0,
       historicalEntries: isSet(object.historicalEntries) ? Number(object.historicalEntries) : 0,
       bondDenom: isSet(object.bondDenom) ? String(object.bondDenom) : "",
+      minCommissionRate: isSet(object.minCommissionRate) ? String(object.minCommissionRate) : "",
     };
   },
 
@@ -1617,6 +1640,7 @@ export const Params = {
     message.maxEntries !== undefined && (obj.maxEntries = Math.round(message.maxEntries));
     message.historicalEntries !== undefined && (obj.historicalEntries = Math.round(message.historicalEntries));
     message.bondDenom !== undefined && (obj.bondDenom = message.bondDenom);
+    message.minCommissionRate !== undefined && (obj.minCommissionRate = message.minCommissionRate);
     return obj;
   },
 
@@ -1629,6 +1653,7 @@ export const Params = {
     message.maxEntries = object.maxEntries ?? 0;
     message.historicalEntries = object.historicalEntries ?? 0;
     message.bondDenom = object.bondDenom ?? "";
+    message.minCommissionRate = object.minCommissionRate ?? "";
     return message;
   },
 };

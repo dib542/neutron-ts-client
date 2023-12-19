@@ -10,6 +10,14 @@
  */
 
 /**
+* MsgUpdateParamsResponse defines the response structure for executing a
+MsgUpdateParams message.
+
+Since: 0.47
+*/
+export type FeeburnerMsgUpdateParamsResponse = object;
+
+/**
  * Params defines the parameters for the module.
  */
 export interface FeeburnerParams {
@@ -195,7 +203,7 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title feeburner/genesis.proto
+ * @title neutron/feeburner/genesis.proto
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {

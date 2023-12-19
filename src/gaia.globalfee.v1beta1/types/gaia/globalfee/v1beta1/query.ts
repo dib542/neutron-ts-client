@@ -1,6 +1,6 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
-import { DecCoin } from "../../../cosmos/base/v1beta1/coin";
+import { Params } from "./genesis";
 
 export const protobufPackage = "gaia.globalfee.v1beta1";
 
@@ -8,30 +8,30 @@ export const protobufPackage = "gaia.globalfee.v1beta1";
  * QueryMinimumGasPricesRequest is the request type for the
  * Query/MinimumGasPrices RPC method.
  */
-export interface QueryMinimumGasPricesRequest {
+export interface QueryParamsRequest {
 }
 
 /**
  * QueryMinimumGasPricesResponse is the response type for the
  * Query/MinimumGasPrices RPC method.
  */
-export interface QueryMinimumGasPricesResponse {
-  minimumGasPrices: DecCoin[];
+export interface QueryParamsResponse {
+  params: Params | undefined;
 }
 
-function createBaseQueryMinimumGasPricesRequest(): QueryMinimumGasPricesRequest {
+function createBaseQueryParamsRequest(): QueryParamsRequest {
   return {};
 }
 
-export const QueryMinimumGasPricesRequest = {
-  encode(_: QueryMinimumGasPricesRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const QueryParamsRequest = {
+  encode(_: QueryParamsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): QueryMinimumGasPricesRequest {
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryParamsRequest {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseQueryMinimumGasPricesRequest();
+    const message = createBaseQueryParamsRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -43,42 +43,42 @@ export const QueryMinimumGasPricesRequest = {
     return message;
   },
 
-  fromJSON(_: any): QueryMinimumGasPricesRequest {
+  fromJSON(_: any): QueryParamsRequest {
     return {};
   },
 
-  toJSON(_: QueryMinimumGasPricesRequest): unknown {
+  toJSON(_: QueryParamsRequest): unknown {
     const obj: any = {};
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<QueryMinimumGasPricesRequest>, I>>(_: I): QueryMinimumGasPricesRequest {
-    const message = createBaseQueryMinimumGasPricesRequest();
+  fromPartial<I extends Exact<DeepPartial<QueryParamsRequest>, I>>(_: I): QueryParamsRequest {
+    const message = createBaseQueryParamsRequest();
     return message;
   },
 };
 
-function createBaseQueryMinimumGasPricesResponse(): QueryMinimumGasPricesResponse {
-  return { minimumGasPrices: [] };
+function createBaseQueryParamsResponse(): QueryParamsResponse {
+  return { params: undefined };
 }
 
-export const QueryMinimumGasPricesResponse = {
-  encode(message: QueryMinimumGasPricesResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.minimumGasPrices) {
-      DecCoin.encode(v!, writer.uint32(10).fork()).ldelim();
+export const QueryParamsResponse = {
+  encode(message: QueryParamsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.params !== undefined) {
+      Params.encode(message.params, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): QueryMinimumGasPricesResponse {
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryParamsResponse {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseQueryMinimumGasPricesResponse();
+    const message = createBaseQueryParamsResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.minimumGasPrices.push(DecCoin.decode(reader, reader.uint32()));
+          message.params = Params.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -88,48 +88,40 @@ export const QueryMinimumGasPricesResponse = {
     return message;
   },
 
-  fromJSON(object: any): QueryMinimumGasPricesResponse {
-    return {
-      minimumGasPrices: Array.isArray(object?.minimumGasPrices)
-        ? object.minimumGasPrices.map((e: any) => DecCoin.fromJSON(e))
-        : [],
-    };
+  fromJSON(object: any): QueryParamsResponse {
+    return { params: isSet(object.params) ? Params.fromJSON(object.params) : undefined };
   },
 
-  toJSON(message: QueryMinimumGasPricesResponse): unknown {
+  toJSON(message: QueryParamsResponse): unknown {
     const obj: any = {};
-    if (message.minimumGasPrices) {
-      obj.minimumGasPrices = message.minimumGasPrices.map((e) => e ? DecCoin.toJSON(e) : undefined);
-    } else {
-      obj.minimumGasPrices = [];
-    }
+    message.params !== undefined && (obj.params = message.params ? Params.toJSON(message.params) : undefined);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<QueryMinimumGasPricesResponse>, I>>(
-    object: I,
-  ): QueryMinimumGasPricesResponse {
-    const message = createBaseQueryMinimumGasPricesResponse();
-    message.minimumGasPrices = object.minimumGasPrices?.map((e) => DecCoin.fromPartial(e)) || [];
+  fromPartial<I extends Exact<DeepPartial<QueryParamsResponse>, I>>(object: I): QueryParamsResponse {
+    const message = createBaseQueryParamsResponse();
+    message.params = (object.params !== undefined && object.params !== null)
+      ? Params.fromPartial(object.params)
+      : undefined;
     return message;
   },
 };
 
 /** Query defines the gRPC querier service. */
 export interface Query {
-  MinimumGasPrices(request: QueryMinimumGasPricesRequest): Promise<QueryMinimumGasPricesResponse>;
+  Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
 }
 
 export class QueryClientImpl implements Query {
   private readonly rpc: Rpc;
   constructor(rpc: Rpc) {
     this.rpc = rpc;
-    this.MinimumGasPrices = this.MinimumGasPrices.bind(this);
+    this.Params = this.Params.bind(this);
   }
-  MinimumGasPrices(request: QueryMinimumGasPricesRequest): Promise<QueryMinimumGasPricesResponse> {
-    const data = QueryMinimumGasPricesRequest.encode(request).finish();
-    const promise = this.rpc.request("gaia.globalfee.v1beta1.Query", "MinimumGasPrices", data);
-    return promise.then((data) => QueryMinimumGasPricesResponse.decode(new _m0.Reader(data)));
+  Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
+    const data = QueryParamsRequest.encode(request).finish();
+    const promise = this.rpc.request("gaia.globalfee.v1beta1.Query", "Params", data);
+    return promise.then((data) => QueryParamsResponse.decode(new _m0.Reader(data)));
   }
 }
 
@@ -147,3 +139,7 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}

@@ -1,7 +1,7 @@
-import { Fee } from "./types/feerefunder/fee"
-import { PacketID } from "./types/feerefunder/fee"
-import { FeeInfo } from "./types/feerefunder/genesis"
-import { Params } from "./types/feerefunder/params"
+import { Fee } from "./types/neutron/feerefunder/fee"
+import { PacketID } from "./types/neutron/feerefunder/fee"
+import { FeeInfo } from "./types/neutron/feerefunder/genesis"
+import { Params } from "./types/neutron/feerefunder/params"
 
 
 export {     

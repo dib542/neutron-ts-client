@@ -7,14 +7,16 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgRegisterInterchainAccount } from "./types/interchaintxs/v1/tx";
-import { MsgSubmitTx } from "./types/interchaintxs/v1/tx";
+import { MsgUpdateParams } from "./types/neutron/interchaintxs/v1/tx";
+import { MsgSubmitTx } from "./types/neutron/interchaintxs/v1/tx";
+import { MsgRegisterInterchainAccount } from "./types/neutron/interchaintxs/v1/tx";
 
+import { Params as typeParams} from "./types"
 
-export { MsgRegisterInterchainAccount, MsgSubmitTx };
+export { MsgUpdateParams, MsgSubmitTx, MsgRegisterInterchainAccount };
 
-type sendMsgRegisterInterchainAccountParams = {
-  value: MsgRegisterInterchainAccount,
+type sendMsgUpdateParamsParams = {
+  value: MsgUpdateParams,
   fee?: StdFee,
   memo?: string
 };
@@ -25,13 +27,23 @@ type sendMsgSubmitTxParams = {
   memo?: string
 };
 
-
-type msgRegisterInterchainAccountParams = {
+type sendMsgRegisterInterchainAccountParams = {
   value: MsgRegisterInterchainAccount,
+  fee?: StdFee,
+  memo?: string
+};
+
+
+type msgUpdateParamsParams = {
+  value: MsgUpdateParams,
 };
 
 type msgSubmitTxParams = {
   value: MsgSubmitTx,
+};
+
+type msgRegisterInterchainAccountParams = {
+  value: MsgRegisterInterchainAccount,
 };
 
 
@@ -64,17 +76,17 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgRegisterInterchainAccount({ value, fee, memo }: sendMsgRegisterInterchainAccountParams): Promise<DeliverTxResponse> {
+		async sendMsgUpdateParams({ value, fee, memo }: sendMsgUpdateParamsParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgRegisterInterchainAccount: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgUpdateParams: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgRegisterInterchainAccount({ value: MsgRegisterInterchainAccount.fromPartial(value) })
+				let msg = this.msgUpdateParams({ value: MsgUpdateParams.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgRegisterInterchainAccount: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgUpdateParams: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -92,12 +104,26 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		
-		msgRegisterInterchainAccount({ value }: msgRegisterInterchainAccountParams): EncodeObject {
-			try {
-				return { typeUrl: "/neutron.interchaintxs.v1.MsgRegisterInterchainAccount", value: MsgRegisterInterchainAccount.fromPartial( value ) }  
+		async sendMsgRegisterInterchainAccount({ value, fee, memo }: sendMsgRegisterInterchainAccountParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgRegisterInterchainAccount: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgRegisterInterchainAccount({ value: MsgRegisterInterchainAccount.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:MsgRegisterInterchainAccount: Could not create message: ' + e.message)
+				throw new Error('TxClient:sendMsgRegisterInterchainAccount: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		
+		msgUpdateParams({ value }: msgUpdateParamsParams): EncodeObject {
+			try {
+				return { typeUrl: "/neutron.interchaintxs.v1.MsgUpdateParams", value: MsgUpdateParams.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgUpdateParams: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -106,6 +132,14 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return { typeUrl: "/neutron.interchaintxs.v1.MsgSubmitTx", value: MsgSubmitTx.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgSubmitTx: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgRegisterInterchainAccount({ value }: msgRegisterInterchainAccountParams): EncodeObject {
+			try {
+				return { typeUrl: "/neutron.interchaintxs.v1.MsgRegisterInterchainAccount", value: MsgRegisterInterchainAccount.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgRegisterInterchainAccount: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -131,6 +165,7 @@ class SDKModule {
 		this.query = queryClient({ addr: client.env.apiURL });		
 		this.updateTX(client);
 		this.structure =  {
+						Params: getStructure(typeParams.fromPartial({})),
 						
 		};
 		client.on('signer-changed',(signer) => {			

@@ -73,11 +73,14 @@ export interface QueryThrottleStateResponse {
   /** current slash_meter state */
   slashMeter: number;
   /**
-   * allowance of voting power units (int) that the slash meter is given per replenish period
-   * this also serves as the max value for the meter.
+   * allowance of voting power units (int) that the slash meter is given per
+   * replenish period this also serves as the max value for the meter.
    */
   slashMeterAllowance: number;
-  /** next time the slash meter could potentially be replenished, iff it's not full */
+  /**
+   * next time the slash meter could potentially be replenished, iff it's not
+   * full
+   */
   nextReplenishCandidate:
     | Date
     | undefined;
@@ -95,13 +98,19 @@ export interface QueryThrottledConsumerPacketDataResponse {
   packetDataInstances: ThrottledPacketDataWrapper[];
 }
 
-/** A query wrapper type for the global entry and data relevant to a throttled slash packet. */
+/**
+ * A query wrapper type for the global entry and data relevant to a throttled
+ * slash packet.
+ */
 export interface ThrottledSlashPacket {
   globalEntry: GlobalSlashEntry | undefined;
   data: SlashPacketData | undefined;
 }
 
-/** ThrottledPacketDataWrapper contains either SlashPacketData or VSCMaturedPacketData */
+/**
+ * ThrottledPacketDataWrapper contains either SlashPacketData or
+ * VSCMaturedPacketData
+ */
 export interface ThrottledPacketDataWrapper {
   slashPacket: SlashPacketData | undefined;
   vscMaturedPacket: VSCMaturedPacketData | undefined;
@@ -1265,16 +1274,22 @@ export interface Query {
    * given a consumer chain validator address
    */
   QueryValidatorProviderAddr(request: QueryValidatorProviderAddrRequest): Promise<QueryValidatorProviderAddrResponse>;
-  /** QueryThrottleState returns the main on-chain state relevant to currently throttled slash packets */
+  /**
+   * QueryThrottleState returns the main on-chain state relevant to currently
+   * throttled slash packets
+   */
   QueryThrottleState(request: QueryThrottleStateRequest): Promise<QueryThrottleStateResponse>;
   /**
-   * QueryThrottledConsumerPacketData returns a list of pending packet data instances
-   * (slash packet and vsc matured) for a single consumer chain
+   * QueryThrottledConsumerPacketData returns a list of pending packet data
+   * instances (slash packet and vsc matured) for a single consumer chain
    */
   QueryThrottledConsumerPacketData(
     request: QueryThrottledConsumerPacketDataRequest,
   ): Promise<QueryThrottledConsumerPacketDataResponse>;
-  /** QueryRegisteredConsumerRewardDenoms returns a list of consumer reward denoms that are registered */
+  /**
+   * QueryRegisteredConsumerRewardDenoms returns a list of consumer reward
+   * denoms that are registered
+   */
   QueryRegisteredConsumerRewardDenoms(
     request: QueryRegisteredConsumerRewardDenomsRequest,
   ): Promise<QueryRegisteredConsumerRewardDenomsResponse>;

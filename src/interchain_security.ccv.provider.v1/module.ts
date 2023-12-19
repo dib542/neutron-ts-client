@@ -12,9 +12,6 @@ import { MsgAssignConsumerKey } from "./types/interchain_security/ccv/provider/v
 
 import { ConsumerState as typeConsumerState} from "./types"
 import { ValsetUpdateIdToHeight as typeValsetUpdateIdToHeight} from "./types"
-import { ValidatorConsumerPubKey as typeValidatorConsumerPubKey} from "./types"
-import { ValidatorByConsumerAddr as typeValidatorByConsumerAddr} from "./types"
-import { ConsumerAddrsToPrune as typeConsumerAddrsToPrune} from "./types"
 import { ConsumerAdditionProposal as typeConsumerAdditionProposal} from "./types"
 import { ConsumerRemovalProposal as typeConsumerRemovalProposal} from "./types"
 import { EquivocationProposal as typeEquivocationProposal} from "./types"
@@ -31,6 +28,9 @@ import { UnbondingOp as typeUnbondingOp} from "./types"
 import { InitTimeoutTimestamp as typeInitTimeoutTimestamp} from "./types"
 import { VscSendTimestamp as typeVscSendTimestamp} from "./types"
 import { KeyAssignmentReplacement as typeKeyAssignmentReplacement} from "./types"
+import { ValidatorConsumerPubKey as typeValidatorConsumerPubKey} from "./types"
+import { ValidatorByConsumerAddr as typeValidatorByConsumerAddr} from "./types"
+import { ConsumerAddrsToPrune as typeConsumerAddrsToPrune} from "./types"
 import { Chain as typeChain} from "./types"
 import { ThrottledSlashPacket as typeThrottledSlashPacket} from "./types"
 import { ThrottledPacketDataWrapper as typeThrottledPacketDataWrapper} from "./types"
@@ -157,9 +157,6 @@ class SDKModule {
 		this.structure =  {
 						ConsumerState: getStructure(typeConsumerState.fromPartial({})),
 						ValsetUpdateIdToHeight: getStructure(typeValsetUpdateIdToHeight.fromPartial({})),
-						ValidatorConsumerPubKey: getStructure(typeValidatorConsumerPubKey.fromPartial({})),
-						ValidatorByConsumerAddr: getStructure(typeValidatorByConsumerAddr.fromPartial({})),
-						ConsumerAddrsToPrune: getStructure(typeConsumerAddrsToPrune.fromPartial({})),
 						ConsumerAdditionProposal: getStructure(typeConsumerAdditionProposal.fromPartial({})),
 						ConsumerRemovalProposal: getStructure(typeConsumerRemovalProposal.fromPartial({})),
 						EquivocationProposal: getStructure(typeEquivocationProposal.fromPartial({})),
@@ -176,6 +173,9 @@ class SDKModule {
 						InitTimeoutTimestamp: getStructure(typeInitTimeoutTimestamp.fromPartial({})),
 						VscSendTimestamp: getStructure(typeVscSendTimestamp.fromPartial({})),
 						KeyAssignmentReplacement: getStructure(typeKeyAssignmentReplacement.fromPartial({})),
+						ValidatorConsumerPubKey: getStructure(typeValidatorConsumerPubKey.fromPartial({})),
+						ValidatorByConsumerAddr: getStructure(typeValidatorByConsumerAddr.fromPartial({})),
+						ConsumerAddrsToPrune: getStructure(typeConsumerAddrsToPrune.fromPartial({})),
 						Chain: getStructure(typeChain.fromPartial({})),
 						ThrottledSlashPacket: getStructure(typeThrottledSlashPacket.fromPartial({})),
 						ThrottledPacketDataWrapper: getStructure(typeThrottledPacketDataWrapper.fromPartial({})),

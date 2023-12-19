@@ -11,6 +11,7 @@ import { Api } from "./rest";
 import { Tx as typeTx} from "./types"
 import { TxRaw as typeTxRaw} from "./types"
 import { SignDoc as typeSignDoc} from "./types"
+import { SignDocDirectAux as typeSignDocDirectAux} from "./types"
 import { TxBody as typeTxBody} from "./types"
 import { AuthInfo as typeAuthInfo} from "./types"
 import { SignerInfo as typeSignerInfo} from "./types"
@@ -18,6 +19,8 @@ import { ModeInfo as typeModeInfo} from "./types"
 import { ModeInfo_Single as typeModeInfo_Single} from "./types"
 import { ModeInfo_Multi as typeModeInfo_Multi} from "./types"
 import { Fee as typeFee} from "./types"
+import { Tip as typeTip} from "./types"
+import { AuxSignerData as typeAuxSignerData} from "./types"
 
 export {  };
 
@@ -78,6 +81,7 @@ class SDKModule {
 						Tx: getStructure(typeTx.fromPartial({})),
 						TxRaw: getStructure(typeTxRaw.fromPartial({})),
 						SignDoc: getStructure(typeSignDoc.fromPartial({})),
+						SignDocDirectAux: getStructure(typeSignDocDirectAux.fromPartial({})),
 						TxBody: getStructure(typeTxBody.fromPartial({})),
 						AuthInfo: getStructure(typeAuthInfo.fromPartial({})),
 						SignerInfo: getStructure(typeSignerInfo.fromPartial({})),
@@ -85,6 +89,8 @@ class SDKModule {
 						ModeInfo_Single: getStructure(typeModeInfo_Single.fromPartial({})),
 						ModeInfo_Multi: getStructure(typeModeInfo_Multi.fromPartial({})),
 						Fee: getStructure(typeFee.fromPartial({})),
+						Tip: getStructure(typeTip.fromPartial({})),
+						AuxSignerData: getStructure(typeAuxSignerData.fromPartial({})),
 						
 		};
 		client.on('signer-changed',(signer) => {			

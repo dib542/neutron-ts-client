@@ -18,6 +18,14 @@ export interface CronMsgExecuteContract {
 }
 
 /**
+* MsgUpdateParamsResponse defines the response structure for executing a
+MsgUpdateParams message.
+
+Since: 0.47
+*/
+export type CronMsgUpdateParamsResponse = object;
+
+/**
  * Params defines the parameters for the module.
  */
 export interface CronParams {
@@ -144,7 +152,8 @@ corresponding request message has used PageRequest.
 export interface V1Beta1PageResponse {
   /**
    * next_key is the key to be passed to PageRequest.key to
-   * query the next page most efficiently
+   * query the next page most efficiently. It will be empty if
+   * there are no more results.
    * @format byte
    */
   next_key?: string;
@@ -278,7 +287,7 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title cron/genesis.proto
+ * @title neutron/cron/genesis.proto
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {

@@ -28,13 +28,6 @@ export interface BlockParams {
    * Note: must be greater or equal to -1
    */
   maxGas: number;
-  /**
-   * Minimum time increment between consecutive blocks (in milliseconds) If the
-   * block header timestamp is ahead of the system clock, decrease this value.
-   *
-   * Not exposed to the application.
-   */
-  timeIotaMs: number;
 }
 
 /** EvidenceParams determine how we handle evidence of malfeasance. */
@@ -74,7 +67,7 @@ export interface ValidatorParams {
 
 /** VersionParams contains the ABCI application version. */
 export interface VersionParams {
-  appVersion: number;
+  app: number;
 }
 
 /**
@@ -175,7 +168,7 @@ export const ConsensusParams = {
 };
 
 function createBaseBlockParams(): BlockParams {
-  return { maxBytes: 0, maxGas: 0, timeIotaMs: 0 };
+  return { maxBytes: 0, maxGas: 0 };
 }
 
 export const BlockParams = {
@@ -185,9 +178,6 @@ export const BlockParams = {
     }
     if (message.maxGas !== 0) {
       writer.uint32(16).int64(message.maxGas);
-    }
-    if (message.timeIotaMs !== 0) {
-      writer.uint32(24).int64(message.timeIotaMs);
     }
     return writer;
   },
@@ -205,9 +195,6 @@ export const BlockParams = {
         case 2:
           message.maxGas = longToNumber(reader.int64() as Long);
           break;
-        case 3:
-          message.timeIotaMs = longToNumber(reader.int64() as Long);
-          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -220,7 +207,6 @@ export const BlockParams = {
     return {
       maxBytes: isSet(object.maxBytes) ? Number(object.maxBytes) : 0,
       maxGas: isSet(object.maxGas) ? Number(object.maxGas) : 0,
-      timeIotaMs: isSet(object.timeIotaMs) ? Number(object.timeIotaMs) : 0,
     };
   },
 
@@ -228,7 +214,6 @@ export const BlockParams = {
     const obj: any = {};
     message.maxBytes !== undefined && (obj.maxBytes = Math.round(message.maxBytes));
     message.maxGas !== undefined && (obj.maxGas = Math.round(message.maxGas));
-    message.timeIotaMs !== undefined && (obj.timeIotaMs = Math.round(message.timeIotaMs));
     return obj;
   },
 
@@ -236,7 +221,6 @@ export const BlockParams = {
     const message = createBaseBlockParams();
     message.maxBytes = object.maxBytes ?? 0;
     message.maxGas = object.maxGas ?? 0;
-    message.timeIotaMs = object.timeIotaMs ?? 0;
     return message;
   },
 };
@@ -363,13 +347,13 @@ export const ValidatorParams = {
 };
 
 function createBaseVersionParams(): VersionParams {
-  return { appVersion: 0 };
+  return { app: 0 };
 }
 
 export const VersionParams = {
   encode(message: VersionParams, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.appVersion !== 0) {
-      writer.uint32(8).uint64(message.appVersion);
+    if (message.app !== 0) {
+      writer.uint32(8).uint64(message.app);
     }
     return writer;
   },
@@ -382,7 +366,7 @@ export const VersionParams = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.appVersion = longToNumber(reader.uint64() as Long);
+          message.app = longToNumber(reader.uint64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -393,18 +377,18 @@ export const VersionParams = {
   },
 
   fromJSON(object: any): VersionParams {
-    return { appVersion: isSet(object.appVersion) ? Number(object.appVersion) : 0 };
+    return { app: isSet(object.app) ? Number(object.app) : 0 };
   },
 
   toJSON(message: VersionParams): unknown {
     const obj: any = {};
-    message.appVersion !== undefined && (obj.appVersion = Math.round(message.appVersion));
+    message.app !== undefined && (obj.app = Math.round(message.app));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<VersionParams>, I>>(object: I): VersionParams {
     const message = createBaseVersionParams();
-    message.appVersion = object.appVersion ?? 0;
+    message.app = object.app ?? 0;
     return message;
   },
 };

@@ -1,5 +1,5 @@
-import { Params } from "./types/feeburner/params"
-import { TotalBurnedNeutronsAmount } from "./types/feeburner/total_burned_neutrons_amount"
+import { Params } from "./types/neutron/feeburner/params"
+import { TotalBurnedNeutronsAmount } from "./types/neutron/feeburner/total_burned_neutrons_amount"
 
 
 export {     

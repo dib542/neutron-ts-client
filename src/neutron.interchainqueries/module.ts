@@ -7,9 +7,10 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgRemoveInterchainQueryRequest } from "./types/interchainqueries/tx";
-import { MsgRegisterInterchainQuery } from "./types/interchainqueries/tx";
-import { MsgSubmitQueryResult } from "./types/interchainqueries/tx";
+import { MsgSubmitQueryResult } from "./types/neutron/interchainqueries/tx";
+import { MsgRemoveInterchainQueryRequest } from "./types/neutron/interchainqueries/tx";
+import { MsgRegisterInterchainQuery } from "./types/neutron/interchainqueries/tx";
+import { MsgUpdateParams } from "./types/neutron/interchainqueries/tx";
 
 import { RegisteredQuery as typeRegisteredQuery} from "./types"
 import { KVKey as typeKVKey} from "./types"
@@ -20,7 +21,13 @@ import { StorageValue as typeStorageValue} from "./types"
 import { Block as typeBlock} from "./types"
 import { TxValue as typeTxValue} from "./types"
 
-export { MsgRemoveInterchainQueryRequest, MsgRegisterInterchainQuery, MsgSubmitQueryResult };
+export { MsgSubmitQueryResult, MsgRemoveInterchainQueryRequest, MsgRegisterInterchainQuery, MsgUpdateParams };
+
+type sendMsgSubmitQueryResultParams = {
+  value: MsgSubmitQueryResult,
+  fee?: StdFee,
+  memo?: string
+};
 
 type sendMsgRemoveInterchainQueryRequestParams = {
   value: MsgRemoveInterchainQueryRequest,
@@ -34,12 +41,16 @@ type sendMsgRegisterInterchainQueryParams = {
   memo?: string
 };
 
-type sendMsgSubmitQueryResultParams = {
-  value: MsgSubmitQueryResult,
+type sendMsgUpdateParamsParams = {
+  value: MsgUpdateParams,
   fee?: StdFee,
   memo?: string
 };
 
+
+type msgSubmitQueryResultParams = {
+  value: MsgSubmitQueryResult,
+};
 
 type msgRemoveInterchainQueryRequestParams = {
   value: MsgRemoveInterchainQueryRequest,
@@ -49,8 +60,8 @@ type msgRegisterInterchainQueryParams = {
   value: MsgRegisterInterchainQuery,
 };
 
-type msgSubmitQueryResultParams = {
-  value: MsgSubmitQueryResult,
+type msgUpdateParamsParams = {
+  value: MsgUpdateParams,
 };
 
 
@@ -83,6 +94,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
+		async sendMsgSubmitQueryResult({ value, fee, memo }: sendMsgSubmitQueryResultParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgSubmitQueryResult: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgSubmitQueryResult({ value: MsgSubmitQueryResult.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgSubmitQueryResult: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
 		async sendMsgRemoveInterchainQueryRequest({ value, fee, memo }: sendMsgRemoveInterchainQueryRequestParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgRemoveInterchainQueryRequest: Unable to sign Tx. Signer is not present.')
@@ -111,20 +136,28 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgSubmitQueryResult({ value, fee, memo }: sendMsgSubmitQueryResultParams): Promise<DeliverTxResponse> {
+		async sendMsgUpdateParams({ value, fee, memo }: sendMsgUpdateParamsParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgSubmitQueryResult: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgUpdateParams: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgSubmitQueryResult({ value: MsgSubmitQueryResult.fromPartial(value) })
+				let msg = this.msgUpdateParams({ value: MsgUpdateParams.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgSubmitQueryResult: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgUpdateParams: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
+		
+		msgSubmitQueryResult({ value }: msgSubmitQueryResultParams): EncodeObject {
+			try {
+				return { typeUrl: "/neutron.interchainqueries.MsgSubmitQueryResult", value: MsgSubmitQueryResult.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgSubmitQueryResult: Could not create message: ' + e.message)
+			}
+		},
 		
 		msgRemoveInterchainQueryRequest({ value }: msgRemoveInterchainQueryRequestParams): EncodeObject {
 			try {
@@ -142,11 +175,11 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgSubmitQueryResult({ value }: msgSubmitQueryResultParams): EncodeObject {
+		msgUpdateParams({ value }: msgUpdateParamsParams): EncodeObject {
 			try {
-				return { typeUrl: "/neutron.interchainqueries.MsgSubmitQueryResult", value: MsgSubmitQueryResult.fromPartial( value ) }  
+				return { typeUrl: "/neutron.interchainqueries.MsgUpdateParams", value: MsgUpdateParams.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgSubmitQueryResult: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgUpdateParams: Could not create message: ' + e.message)
 			}
 		},
 		

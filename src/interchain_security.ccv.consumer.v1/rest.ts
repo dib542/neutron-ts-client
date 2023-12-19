@@ -11,7 +11,7 @@
 
 export interface Ccvconsumerv1Params {
   /**
-   * TODO: Remove enabled flag and find a better way to setup e2e tests
+   * TODO: Remove enabled flag and find a better way to setup integration tests
    * See: https://github.com/cosmos/interchain-security/issues/339
    */
   enabled?: boolean;
@@ -64,17 +64,21 @@ export interface Ccvconsumerv1Params {
 
   /**
    * The threshold for the percentage of validators at the bottom of the set who
-   * can opt out of running the consumer chain without being punished. For example, a
-   * value of 0.05 means that the validators in the bottom 5% of the set can opt out
+   * can opt out of running the consumer chain without being punished. For
+   * example, a value of 0.05 means that the validators in the bottom 5% of the
+   * set can opt out
    */
   soft_opt_out_threshold?: string;
 
-  /** Reward denoms. These are the denominations which are allowed to be sent to the provider as rewards. */
+  /**
+   * Reward denoms. These are the denominations which are allowed to be sent to
+   * the provider as rewards.
+   */
   reward_denoms?: string[];
 
   /**
-   * Provider-originated reward denoms. These are denoms coming from the provider
-   * which are allowed to be used as rewards. e.g. "uatom"
+   * Provider-originated reward denoms. These are denoms coming from the
+   * provider which are allowed to be used as rewards. e.g. "uatom"
    */
   provider_reward_denoms?: string[];
 }
